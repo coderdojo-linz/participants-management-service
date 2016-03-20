@@ -1,3 +1,14 @@
+# Compiled JS files
+**/*.js
+!Gulpfile.js
+!build/**/*.js
+
+# VSCode
+.vscode
+
+# Typings
+typings
+
 # Logs
 logs
 *.log

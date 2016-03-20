@@ -1,0 +1,28 @@
+{
+  "name": "participants-management-service",
+  "version": "1.0.0",
+  "description": "RESTful Web API for CoderDojo Linz participants management",
+  "main": "server.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coderdojo-linz/participants-management-service.git"
+  },
+  "author": "Coding Club Linz e.V.",
+  "license": "MIT",
+  "devDependencies": {
+    "del": "^2.2.0",
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^2.12.1",
+    "typescript": "^1.8.9",
+    "typings": "^0.7.9"
+  },
+  "dependencies": {
+    "body-parser": "^1.15.0",
+    "chalk": "^1.1.1",
+    "cors": "^2.7.1",
+    "express": "^4.13.4",
+    "jsonwebtoken": "^5.7.0",
+    "needle": "^1.0.0"
+  }
+}
