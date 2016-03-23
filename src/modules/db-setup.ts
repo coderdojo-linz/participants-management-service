@@ -1,0 +1,28 @@
+/// <reference path="../../typings/main.d.ts" />
+import * as mongodb from 'mongodb';
+import * as chalk from 'chalk';
+
+export interface IInitialAdmin {
+    givenName: string;
+    familyName: string;
+    email: string;
+}
+
+export async function setupNewDatabase(mongoUrl: string, initialAdmin: IInitialAdmin) {
+    let db = await mongodb.MongoClient.connect(mongoUrl);
+    let participants = db.collection("participants");
+    let admin = await participants.find({ isAdmin: true }).limit(1).toArray();
+    if (!admin.length) {
+        // No admin in DB -> create initial admin
+        await participants.insertOne({
+            givenName: initialAdmin.givenName,
+            familyName: initialAdmin.familyName,
+            email: initialAdmin.email,
+            isAdmin: true
+        });
+        console.log("No admin existed, created one.");
+    } else {
+        console.log(chalk.red("DB already configured"))
+        throw "DB already configured";
+    }
+}

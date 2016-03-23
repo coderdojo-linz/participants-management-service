@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "RESTful Web API for CoderDojo Linz participants management",
   "main": "server.js",
-  "scripts": {},
+  "scripts": {
+    "start": "node ./dist/server.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/coderdojo-linz/participants-management-service.git"
@@ -23,6 +25,7 @@
     "cors": "^2.7.1",
     "express": "^4.13.4",
     "jsonwebtoken": "^5.7.0",
+    "mongodb": "^2.1.11",
     "needle": "^1.0.0"
   }
 }

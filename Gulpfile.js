@@ -10,7 +10,7 @@ var tsClientProject = ts.createProject("tsconfig.json", {
 
 // Cleanup by deleting target directory
 gulp.task("clean", () => {
-    del.sync(config.CLEAN_JS);
+    del.sync(config.CLEAN);
 });
 
 // Compile Typescript files

@@ -3,6 +3,9 @@
 !Gulpfile.js
 !build/**/*.js
 
+# Command file with environment variables (just used during development)
+SetEnv.cmd
+
 # VSCode
 .vscode
 
