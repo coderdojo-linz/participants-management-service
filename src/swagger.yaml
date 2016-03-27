@@ -1,0 +1,74 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: CoderDojo Linz Partitipants Management
+  description: Web API for managing participants for CoderDojo Linz
+  termsOfService: See 'https://coderdojo-linz.github.io'
+  contact:
+    name: CoderDojo Linz Team
+    email: info@coderdojo-linz.org
+    url: 'https://coderdojo-linz.github.io'
+  license:
+    name: MIT
+    url: 'http://opensource.org/licenses/MIT'
+host: unknown
+basePath: /api
+schemes:
+  - http
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /events:
+    get:
+      description: Returns all CoderDojo events
+      operationId: findEvents
+      produces:
+        - application/json
+      parameters:
+        - name: past
+          in: query
+          description: value indicating whether the result should include past events
+          required: false
+          type: boolean
+      responses:
+        '200':
+          description: event response
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/event'
+
+  '/events/{id}':
+    get:
+      description: Returns an event based on an event ID
+      operationId: findEventById
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: ID of event to fetch
+          required: true
+          type: string
+      responses:
+        '200':
+          description: event response
+          schema:
+            $ref: '#/definitions/event'
+definitions:
+  event:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: string
+      date:
+        type: string
+        format: date
+      location:
+        type: string
+

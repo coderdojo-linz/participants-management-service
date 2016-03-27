@@ -18,7 +18,9 @@ export async function setupNewDatabase(mongoUrl: string, initialAdmin: IInitialA
             givenName: initialAdmin.givenName,
             familyName: initialAdmin.familyName,
             email: initialAdmin.email,
-            isAdmin: true
+            roles: {
+                isAdmin: true
+            }
         });
         console.log("No admin existed, created one.");
     } else {
