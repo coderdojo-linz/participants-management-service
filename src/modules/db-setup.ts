@@ -6,6 +6,7 @@ export interface IInitialAdmin {
     givenName: string;
     familyName: string;
     email: string;
+    googleSubject: string;
 }
 
 export async function setupNewDatabase(mongoUrl: string, initialAdmin: IInitialAdmin) {
@@ -18,6 +19,7 @@ export async function setupNewDatabase(mongoUrl: string, initialAdmin: IInitialA
             givenName: initialAdmin.givenName,
             familyName: initialAdmin.familyName,
             email: initialAdmin.email,
+            googleSubject: initialAdmin.googleSubject,
             roles: {
                 isAdmin: true
             }

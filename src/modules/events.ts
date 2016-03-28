@@ -1,7 +1,5 @@
 /// <reference path="../../typings/main.d.ts" />
 import * as mongodb from 'mongodb';
-import * as chalk from 'chalk';
-import * as moment from 'moment';
 
 export module Events {
     export interface IEvent {
@@ -10,7 +8,13 @@ export module Events {
         location: string;
     }
 
-    export class EventStore {
+    export interface IEventStore {
+        getAll(includePastEvents: boolean): Promise<IEvent[]>;
+        getById(_id: string): Promise<IEvent>;
+        add(event: IEvent): Promise<IEvent>;
+    }
+
+    export class EventStore implements IEventStore {
         constructor(private mongoUrl: string) { }
 
         private async eventCollection(): Promise<mongodb.Collection> {
@@ -32,22 +36,26 @@ export module Events {
             }
         }
 
-        public async getSingle(_id: string): Promise<IEvent> {
+        public async getById(_id: string): Promise<IEvent> {
             let events = await this.eventCollection();
-            var result = await events.find({ _id: _id }).limit(1).toArray();
+            var result = await events.find({ _id: new mongodb.ObjectID(_id) }).limit(1).toArray();
             return (result.length !== 0) ? result[0] : null; 
         }
 
         public async add(event: IEvent): Promise<IEvent> {
+            // Check mandatory fields
+            if (!event.date || !(event.date instanceof Date)) {
+                throw "Missing or invalid member 'date'.";
+            }
+
+            if (!event.location || typeof event.location !== "string") {
+                throw "Missing or invalid member 'location'.";
+            }
+            
             let events = await this.eventCollection();
-            console.log(event);
-            var newEvent : IEvent = {
-                date: new Date(Date.UTC(event.date.getUTCFullYear(), event.date.getUTCMonth(), event.date.getUTCDate())),
-                location: event.location
-            };
-            console.log(newEvent);
-            await events.insertOne(newEvent);
-            return newEvent;
+            event.date = new Date(Date.UTC(event.date.getUTCFullYear(), event.date.getUTCMonth(), event.date.getUTCDate())); 
+            await events.insertOne(event);
+            return event;
         }
     }
 }

@@ -28,7 +28,8 @@ app.get("/admin/db-setup", verifyJwt.google, async (req, res) => {
         await dbSetup.setupNewDatabase(config.MONGO_URL, {
             givenName: req.user.given_name,
             familyName: req.user.family_name,
-            email: req.user.email
+            email: req.user.email,
+            googleSubject: req.user.sub
         });
         res.status(200).end();
     } catch (err) {
@@ -39,8 +40,13 @@ app.get("/admin/db-setup", verifyJwt.google, async (req, res) => {
 // Events API
 app.get("/api/events", async (req, res) => {
     try {
-        var store = new Events.EventStore(config.MONGO_URL);
-        var result = await store.getAll(req.query.past && req.query.past === "true");
+        var includePastEvents = req.query.past && req.query.past === "true";
+        
+        // Query db
+        var store : Events.IEventStore = new Events.EventStore(config.MONGO_URL);
+        var result = await store.getAll(includePastEvents);
+        
+        // Build result
         res.status(200).send(result);
     } catch (err) {
         res.status(500).send({ error: err });
@@ -49,11 +55,15 @@ app.get("/api/events", async (req, res) => {
 
 app.get("/api/events/:_id", async (req, res) => {
     try {
-        var store = new Events.EventStore(config.MONGO_URL);
-        var result = await store.getSingle(req.params._id);
+        // Query db
+        var store : Events.IEventStore = new Events.EventStore(config.MONGO_URL);
+        var result = await store.getById(req.params._id);
+        
+        // Build result
         if (result) {
             res.status(200).send(result);
         } else {
+            // Not found
             res.status(404).end();
         }
     } catch (err) {
@@ -63,20 +73,25 @@ app.get("/api/events/:_id", async (req, res) => {
 
 app.post("/api/events", verifyJwt.google, async (req, res) => {
     try {
-        // Check input parameter
+        // Check mandatory fields
         if (!req.body.date) { 
-            res.status(400).send("Missing parameter 'date'.");
+            res.status(400).send("Missing member 'date'.");
             return;
         }
 
         if (!req.body.location) { 
-            res.status(400).send("Missing parameter 'location'.");
+            res.status(400).send("Missing member 'location'.");
             return;
         }
         
-        var store = new Events.EventStore(config.MONGO_URL);
+        // Parse date
         req.body.date = new Date(Date.parse(req.body.date));
+        
+        // Add row to db
+        var store : Events.IEventStore = new Events.EventStore(config.MONGO_URL);
         var result = await store.add(req.body);
+        
+        // Build result
         res.setHeader("Location", `/api/events/${result._id}`);
         res.status(201).send(result);
     } catch (err) {
