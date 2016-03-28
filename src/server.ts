@@ -40,15 +40,30 @@ app.get("/admin/db-setup", verifyJwt.google, async (req, res) => {
 app.get("/api/events", async (req, res) => {
     try {
         var store = new Events.EventStore(config.MONGO_URL);
-        var result = store.get(req.param("past", false) === "true");
+        var result = await store.getAll(req.query.past && req.query.past === "true");
         res.status(200).send(result);
     } catch (err) {
         res.status(500).send({ error: err });
     }
 });
 
-app.post("/api/events", async (req, res) => {
+app.get("/api/events/:_id", async (req, res) => {
     try {
+        var store = new Events.EventStore(config.MONGO_URL);
+        var result = await store.getSingle(req.params._id);
+        if (result) {
+            res.status(200).send(result);
+        } else {
+            res.status(404).end();
+        }
+    } catch (err) {
+        res.status(500).send({ error: err });
+    }
+});
+
+app.post("/api/events", verifyJwt.google, async (req, res) => {
+    try {
+        // Check input parameter
         if (!req.body.date) { 
             res.status(400).send("Missing parameter 'date'.");
             return;
@@ -62,7 +77,8 @@ app.post("/api/events", async (req, res) => {
         var store = new Events.EventStore(config.MONGO_URL);
         req.body.date = new Date(Date.parse(req.body.date));
         var result = await store.add(req.body);
-        res.status(201).send(result).setHeader("Location", `/api/events/${result._id}`);
+        res.setHeader("Location", `/api/events/${result._id}`);
+        res.status(201).send(result);
     } catch (err) {
         res.status(500).send({ error: err });
     }

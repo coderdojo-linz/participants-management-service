@@ -18,24 +18,24 @@ export module Events {
             return db.collection("events");
         }
 
-        public async get(includePastEvents: boolean): Promise<IEvent[]> {
+        public async getAll(includePastEvents: boolean): Promise<IEvent[]> {
             let events = await this.eventCollection();
             if (includePastEvents) {
                 return await events.find({}).toArray();
             } else {
                 var now = new Date();
                 var result = await events.find({
-                    date: { $ge: Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) }
+                    date: { $gte: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())) }
                 }).toArray();
 
-                return result/*.map(r => {
-                    return {
-                        id: r._id.toHexString(),
-                        date: r.date,
-                        location: r.location
-                    }
-                })*/;
+                return result;
             }
+        }
+
+        public async getSingle(_id: string): Promise<IEvent> {
+            let events = await this.eventCollection();
+            var result = await events.find({ _id: _id }).limit(1).toArray();
+            return (result.length !== 0) ? result[0] : null; 
         }
 
         public async add(event: IEvent): Promise<IEvent> {

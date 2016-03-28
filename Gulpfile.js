@@ -2,6 +2,7 @@ var gulp = require('gulp');
 var del = require('del');
 var ts = require('gulp-typescript');
 var config = require('./build/config');
+var sourcemaps = require('gulp-sourcemaps');
 
 // Create TypeScript project from tsconfig.json
 var tsClientProject = ts.createProject("tsconfig.json", {
@@ -16,7 +17,9 @@ gulp.task("clean", () => {
 // Compile Typescript files
 gulp.task("app", [], () => {
     var tsResult = gulp.src(config.TS_SOURCES)
+        .pipe(sourcemaps.init())
         .pipe(ts(tsClientProject))
+        .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(config.APP_DIST));
 });
 
