@@ -6,11 +6,14 @@ import * as verifyJwt from "./middleware/verify-jwt";
 import * as dbSetup from "./modules/db-setup";
 import * as config from "./config";
 import { Events } from "./modules/events";
+import * as utils from "./middleware/utils";
+import { Model } from "./model";
 
 // Create express server
 var app = express();
 app.use(cors());
-app.use(bodyParser.json());
+var bodyParserOptions = { reviver: utils.Middleware.reviver };
+app.use(bodyParser.json(bodyParserOptions));
 app.use(devToken.google);  // Login page for dev-purposes at /auth/devToken
 
 // Create simple API that can be used for testing
@@ -73,19 +76,13 @@ app.get("/api/events/:_id", async (req, res) => {
 
 app.post("/api/events", verifyJwt.google, async (req, res) => {
     try {
-        // Check mandatory fields
-        if (!req.body.date) { 
-            res.status(400).send("Missing member 'date'.");
-            return;
+        // Check validity of passed event
+        let event : Model.Event.IEvent = req.body;
+        let isValid = Model.Event.isValid(event, true);
+        if (!isValid[0]) {
+            // Bad request
+            res.status(400).send(isValid[1]);
         }
-
-        if (!req.body.location) { 
-            res.status(400).send("Missing member 'location'.");
-            return;
-        }
-        
-        // Parse date
-        req.body.date = new Date(Date.parse(req.body.date));
         
         // Add row to db
         var store : Events.IEventStore = new Events.EventStore(config.MONGO_URL);

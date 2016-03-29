@@ -1,17 +1,12 @@
 /// <reference path="../../typings/main.d.ts" />
 import * as mongodb from 'mongodb';
+import { Model } from '../model';
 
 export module Events {
-    export interface IEvent {
-        _id?: string;
-        date: Date;
-        location: string;
-    }
-
     export interface IEventStore {
-        getAll(includePastEvents: boolean): Promise<IEvent[]>;
-        getById(_id: string): Promise<IEvent>;
-        add(event: IEvent): Promise<IEvent>;
+        getAll(includePastEvents: boolean): Promise<Model.Event.IEvent[]>;
+        getById(_id: string): Promise<Model.Event.IEvent>;
+        add(event: Model.Event.IEvent): Promise<Model.Event.IEvent>;
     }
 
     export class EventStore implements IEventStore {
@@ -22,13 +17,13 @@ export module Events {
             return db.collection("events");
         }
 
-        public async getAll(includePastEvents: boolean): Promise<IEvent[]> {
+        public async getAll(includePastEvents: boolean): Promise<Model.Event.IEvent[]> {
             let events = await this.eventCollection();
             if (includePastEvents) {
                 return await events.find({}).toArray();
             } else {
-                var now = new Date();
-                var result = await events.find({
+                let now = new Date();
+                let result = await events.find({
                     date: { $gte: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())) }
                 }).toArray();
 
@@ -36,24 +31,23 @@ export module Events {
             }
         }
 
-        public async getById(_id: string): Promise<IEvent> {
+        public async getById(_id: string): Promise<Model.Event.IEvent> {
             let events = await this.eventCollection();
-            var result = await events.find({ _id: new mongodb.ObjectID(_id) }).limit(1).toArray();
+            let result = await events.find({ _id: new mongodb.ObjectID(_id) }).limit(1).toArray();
             return (result.length !== 0) ? result[0] : null; 
         }
 
-        public async add(event: IEvent): Promise<IEvent> {
-            // Check mandatory fields
-            if (!event.date || !(event.date instanceof Date)) {
-                throw "Missing or invalid member 'date'.";
-            }
-
-            if (!event.location || typeof event.location !== "string") {
-                throw "Missing or invalid member 'location'.";
+        public async add(event: Model.Event.IEvent): Promise<Model.Event.IEvent> {
+            // Check validity of event
+            let isValid = Model.Event.isValid(event, true);
+            if (!isValid[0]) {
+                throw isValid[1];
             }
             
+            // Ignore time part of event date
+            event.date = new Date(Date.UTC(event.date.getUTCFullYear(), event.date.getUTCMonth(), event.date.getUTCDate()));
+             
             let events = await this.eventCollection();
-            event.date = new Date(Date.UTC(event.date.getUTCFullYear(), event.date.getUTCMonth(), event.date.getUTCDate())); 
             await events.insertOne(event);
             return event;
         }
