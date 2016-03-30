@@ -29,7 +29,7 @@ const devLoginForm = `<html lang="en">
   </body>
 </html>`;
 
-export function google(req: express.Request, res: express.Response, next: express.NextFunction) {
+function google(req: express.Request, res: express.Response, next: express.NextFunction) {
     if(req.path == "/auth/devToken")
     {
         res.send(devLoginForm);
@@ -38,3 +38,5 @@ export function google(req: express.Request, res: express.Response, next: expres
         next();
     }
 }
+
+export default google;

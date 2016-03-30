@@ -1,15 +1,9 @@
 /// <reference path="../../typings/main.d.ts" />
 import * as mongodb from 'mongodb';
 import * as chalk from 'chalk';
+import * as contracts from './contracts';
 
-export interface IInitialAdmin {
-    givenName: string;
-    familyName: string;
-    email: string;
-    googleSubject: string;
-}
-
-export async function setupNewDatabase(mongoUrl: string, initialAdmin: IInitialAdmin) {
+async function setupNewDatabase(mongoUrl: string, initialAdmin: contracts.IInitialAdmin) {
     let db = await mongodb.MongoClient.connect(mongoUrl);
     let participants = db.collection("participants");
     let admin = await participants.find({ isAdmin: true }).limit(1).toArray();
@@ -30,3 +24,5 @@ export async function setupNewDatabase(mongoUrl: string, initialAdmin: IInitialA
         throw "DB already configured";
     }
 }
+
+export default setupNewDatabase;

@@ -23,7 +23,7 @@ function fetchGoogleCertsAsync() : Promise<any> {
     });
 }
 
-export async function google(req: express.Request, res: express.Response, next: express.NextFunction) {
+async function google(req: express.Request, res: express.Response, next: express.NextFunction) {
     var authorizationHeader = req.header("Authorization");
     if (authorizationHeader) {
         var indexOfSeparator = authorizationHeader.indexOf(" ");
@@ -72,3 +72,5 @@ export async function google(req: express.Request, res: express.Response, next: 
         res.status(401).send("Missing authorization token.");
     }
 }
+
+export default google;

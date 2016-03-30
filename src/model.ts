@@ -1,67 +1,89 @@
 /// <reference path="../typings/main.d.ts" />
 import { ObjectID } from 'mongodb';
 
-export module Model {
-    /**
-     * Represents a MongoDB object with an ID
-     */
-    export interface IMongoObject {
-        _id?: ObjectID;
-    }
+/**
+ * Represents a MongoDB object with an ID
+ */
+export interface IMongoObject {
+    _id?: ObjectID;
+}
 
-    /**
-     * Checks whether an object is valid.
-     * @param o - Object to validate
-     * @param isNew - Indicates whether the object is a new object (_id can be empty)
-     *                or an existing one (_id cannot be empty).
-     */
-    export function isValid(o: IMongoObject, isNew: boolean): [boolean, string] {
-        if (!isNew) {
-            if (!o._id) {
-                return [false, "Mandatory member '_id' is missing. Can only be left out for new objects."];
-            }
+export interface IValidationResult {
+    isValid: boolean;
+    errorMessage?: string;
+}
 
-            if (!(o._id instanceof ObjectID)) {
-                return [false, "'_id' is not of type 'ObjectID'."];
-            }
+/**
+ * Checks whether an object is valid.
+ * @param o - Object to validate
+ * @param isNew - Indicates whether the object is a new object (_id can be empty)
+ *                or an existing one (_id cannot be empty).
+ */
+export function isValidMongoObject(o: IMongoObject, isNew: boolean): IValidationResult {
+    if (!isNew) {
+        if (!o._id) {
+            return { isValid: false, errorMessage: "Mandatory member '_id' is missing. Can only be left out for new objects." };
         }
 
-        return [true, null];
-    }
-
-    export module Event {
-        export interface IEvent extends IMongoObject {
-            date: Date;
-            location: string;
-        }
-
-        export function isValid(event: IEvent, isNew: boolean): [boolean, string] {
-            var isBaseValid = Model.isValid(event, isNew);
-            if (!isBaseValid[0]) {
-                return isBaseValid;
-            }
-
-            if (!event) {
-                return [false, "'event' must not be null."];
-            }
-
-            if (!event.date) {
-                return [false, "Mandatory member 'date' is missing."];
-            }
-
-            if (!(event.date instanceof Date)) {
-                return [false, "'date' is not of type 'Date'."];
-            }
-
-            if (!event.location) {
-                return [false, "Mandatory member 'location' is missing."];
-            }
-
-            if (typeof event.location !== "string") {
-                return [false, "'location' is not of type 'string'."];
-            }
-
-            return [true, null];
+        if (!(o._id instanceof ObjectID)) {
+            return { isValid: false, errorMessage: "'_id' is not of type 'ObjectID'." };
         }
     }
+
+    return { isValid: true };
+}
+
+export interface IEvent extends IMongoObject {
+    date: Date;
+    location: string;
+}
+
+export function isValidEvent(event: IEvent, isNew: boolean): IValidationResult {
+    var result = isValidMongoObject(event, isNew);
+    if (!result.isValid) {
+        return result;
+    }
+
+    if (!event) {
+        return { isValid: false, errorMessage: "'event' must not be null." };
+    }
+
+    if (!event.date) {
+        return { isValid: false, errorMessage: "Mandatory member 'date' is missing." };
+    }
+
+    if (!(event.date instanceof Date)) {
+        return { isValid: false, errorMessage: "'date' is not of type 'Date'." };
+    }
+
+    if (!event.location) {
+        return { isValid: false, errorMessage: "Mandatory member 'location' is missing." };
+    }
+
+    if (typeof event.location !== "string") {
+        return { isValid: false, errorMessage: "'location' is not of type 'string'." };
+    }
+
+    return { isValid: true };
+}
+
+export interface IParticipantRoles {
+    isAdmin?: boolean;
+}
+
+export interface IParticipant {
+    givenName?: string;
+    familyName?: string;
+    email?: string;
+    googleSubject?: string;
+    roles?: IParticipantRoles;
+}
+
+export function isValidParticipant(participant: IParticipant, isNew: boolean): IValidationResult {
+    var result = isValidMongoObject(participant, isNew);
+    if (!result.isValid) {
+        return result;
+    }
+    
+    return { isValid: true };    
 }
