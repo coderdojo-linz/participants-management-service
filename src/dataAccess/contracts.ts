@@ -16,13 +16,19 @@ export interface IInitialAdmin {
     googleSubject: string;
 }
 
-export interface IEventStore {
+export interface IStoreBase<T> {
+    getById(_id: string): Promise<T>;
+}
+
+export interface IEventStore extends IStoreBase<model.IEvent> {
     getAll(includePastEvents: boolean): Promise<model.IEvent[]>;
     getById(_id: string): Promise<model.IEvent>;
     add(event: model.IEvent): Promise<model.IEvent>;
 }
 
-export interface IParticipantStore {
+export interface IParticipantStore extends IStoreBase<model.IParticipant> {
     isAdmin(googleSubject: string): Promise<boolean>;
     add(participant: model.IParticipant): Promise<model.IParticipant>;
+    getById(_id: string): Promise<model.IParticipant>;
+    getAllSummary() : Promise<model.IParticipantSummary>;
 }

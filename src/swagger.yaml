@@ -21,30 +21,60 @@ consumes:
 produces:
   - application/json
 paths:
-  /events:
+  /api/events:
     get:
       description: Returns all CoderDojo events
-      operationId: findEvents
+      operationId: getEvents
       produces:
         - application/json
       parameters:
         - name: past
           in: query
-          description: value indicating whether the result should include past events
+          description: Value indicating whether the result should include past events.
           required: false
+          default: false
           type: boolean
       responses:
         '200':
-          description: event response
+          description: Array of CoderDojo events
           schema:
             type: array
             items:
               $ref: '#/definitions/event'
+        '500':
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/error'
+    post:
+      description: Adds a CoderDojo event
+      operationId: addEvent
+      produces:
+        - application/json
+      parameters:
+        - name: event
+          in: body
+          description: Event data
+          required: true
+          schema:
+            $ref: '#/definitions/newEvent'
+      responses:
+        '201':
+          description: Created event
+          schema:
+            $ref: '#/definitions/event'
+        '400':
+          description: Event data not valid
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/error'
 
-  '/events/{id}':
+  /api/events/{id}:
     get:
       description: Returns an event based on an event ID
-      operationId: findEventById
+      operationId: getEventById
       produces:
         - application/json
       parameters:
@@ -55,20 +85,143 @@ paths:
           type: string
       responses:
         '200':
-          description: event response
+          description: Data of the requested event
           schema:
             $ref: '#/definitions/event'
+        '404':
+          description: No event exists with the specified event ID
+        '500':
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/error'
+
+  /api/participants:
+    post:
+      description: Adds a new participant
+      operationId: addParticipant
+      produces:
+        - application/json
+      parameters:
+        - name: participant
+          in: body
+          description: Participant data
+          required: true
+          schema:
+            $ref: '#/definitions/newParticipant'
+      responses:
+        '201':
+          description: Created participant
+          schema:
+            $ref: '#/definitions/participant'
+        '400':
+          description: Participant data not valid
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/error'
+  
+  /api/participants/summary:
+    get:
+      description: Returns a summary of all participants
+      operationId: getParticipantsSummary
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Array of participant summary rows
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/participantSummary'
+        '500':
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/error'
+      
 definitions:
+  newEvent:
+    type: object
+    required:
+      - date
+      - location
+    properties:
+      date:
+        type: string
+        format: date
+      location:
+        type: string
   event:
     type: object
     required:
-      - id
+      - _id
+      - date
+      - location
     properties:
-      id:
+      _id:
         type: string
       date:
         type: string
         format: date
       location:
         type: string
+  participantRoles:
+    type: object
+    properties:
+      isAdmin:
+        type: boolean
+  newParticipant:
+    type: object
+    required:
+      - givenName
+      - familyName
+    properties:
+      givenName:
+        type: string
+      familyName:
+        type: string
+      email:
+        type: string
+      roles:
+        $ref: '#/definitions/participantRoles'
+  participant:
+    type: object
+    required:
+      - _id
+      - givenName
+      - familyName
+    properties:
+      _id:
+        type: string
+      givenName:
+        type: string
+      familyName:
+        type: string
+      email:
+        type: string
+      roles:
+        $ref: '#/definitions/participantRoles'
+  participantSummary:
+    type: object
+    required:
+      - _id
+      - givenName
+      - familyName
+    properties:
+      _id:
+        type: string
+      givenName:
+        type: string
+      familyName:
+        type: string
+      email:
+        type: string
+  error:
+    type: object
+    required:
+      - error
+    properties:
+      error:
+        type: object
 

@@ -8,6 +8,7 @@ import * as config from "./config";
 import reviver from "./middleware/reviver";
 import addDataContext from "./middleware/add-data-context";
 import * as eventApi from "./middleware/events-api";
+import * as participantsApi from "./middleware/participants-api";
 import setupDb from "./middleware/db-setup-api";
 
 var app = express();
@@ -25,6 +26,10 @@ app.get("/admin/db-setup", verifyGoogleJwt, setupDb);
 app.get("/api/events", eventApi.getAll);
 app.get("/api/events/:_id", eventApi.getById);
 app.post("/api/events", verifyGoogleJwt, ensureAdmin, eventApi.add);
+
+// Participants API
+app.get("/api/participants/summary", verifyGoogleJwt, ensureAdmin, participantsApi.getAllSummary);
+app.post("/api/participants", verifyGoogleJwt, ensureAdmin, participantsApi.add);
 
 // Start express server
 var port: number = process.env.port || 1337;

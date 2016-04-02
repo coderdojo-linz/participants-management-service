@@ -4,13 +4,11 @@ import * as contracts from "../dataAccess/contracts";
 import * as model from "../model";
 import getDataContext from "./get-data-context";
 
-export async function getAll(req: express.Request, res: express.Response, next: express.NextFunction) {
+export async function getAllSummary(req: express.Request, res: express.Response, next: express.NextFunction) {
     try {
-        var includePastEvents = req.query.past && req.query.past === "true";
-
         // Query db
-        let store = getDataContext(req).events;
-        var result = await store.getAll(includePastEvents);
+        let store = getDataContext(req).participants;
+        var result = await store.getAllSummary();
 
         // Build result
         res.status(200).send(result);
@@ -22,7 +20,7 @@ export async function getAll(req: express.Request, res: express.Response, next: 
 export async function getById(req: express.Request, res: express.Response, next: express.NextFunction) {
     try {
         // Query db
-        var store = getDataContext(req).events;
+        var store = getDataContext(req).participants;
         var result = await store.getById(req.params._id);
 
         // Build result
@@ -40,19 +38,19 @@ export async function getById(req: express.Request, res: express.Response, next:
 export async function add(req: express.Request, res: express.Response, next: express.NextFunction) {
     try {
         // Check validity of passed event
-        let event: model.IEvent = req.body;
-        let validationResult = model.isValidEvent(event, true);
+        let participant: model.IParticipant = req.body;
+        let validationResult = model.isValidParticipant(participant, true);
         if (!validationResult.isValid) {
             // Bad request
             res.status(400).send(validationResult.errorMessage);
         }
 
         // Add row to db
-        let store = getDataContext(req).events;
-        let result = await store.add(event);
+        let store = getDataContext(req).participants;
+        let result = await store.add(participant);
 
         // Build result
-        res.setHeader("Location", `/api/events/${result._id}`);
+        res.setHeader("Location", `/api/participants/${result._id}`);
         res.status(201).send(result);
     } catch (err) {
         res.status(500).send({ error: err });

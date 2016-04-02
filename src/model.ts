@@ -71,10 +71,13 @@ export interface IParticipantRoles {
     isAdmin?: boolean;
 }
 
-export interface IParticipant {
+export interface IParticipantSummary extends IMongoObject {
     givenName?: string;
     familyName?: string;
     email?: string;
+}
+
+export interface IParticipant extends IParticipantSummary {
     googleSubject?: string;
     roles?: IParticipantRoles;
 }
@@ -84,6 +87,36 @@ export function isValidParticipant(participant: IParticipant, isNew: boolean): I
     if (!result.isValid) {
         return result;
     }
-    
-    return { isValid: true };    
+
+    if (!participant.givenName) {
+        return { isValid: false, errorMessage: "Mandatory member 'givenName' is missing." };
+    }
+
+    if (typeof participant.givenName !== "string") {
+        return { isValid: false, errorMessage: "'givenName' is not of type 'string'." };
+    }
+
+    if (!participant.familyName) {
+        return { isValid: false, errorMessage: "Mandatory member 'familyName' is missing." };
+    }
+
+    if (typeof participant.familyName !== "string") {
+        return { isValid: false, errorMessage: "'familyName' is not of type 'string'." };
+    }
+
+    if (typeof participant.googleSubject !== "string") {
+        return { isValid: false, errorMessage: "'googleSubject' is not of type 'string'." };
+    }
+
+    if (participant.roles) {
+        if (typeof participant.roles !== "object") {
+            return { isValid: false, errorMessage: "'roles' is not of type 'object'." };
+        }
+
+        if (participant.roles.isAdmin && typeof participant.roles.isAdmin !== "boolean") {
+            return { isValid: false, errorMessage: "'roles.isAdmin' is not of type 'boolean'." };
+        }
+    }
+
+    return { isValid: true };
 }

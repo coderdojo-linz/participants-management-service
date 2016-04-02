@@ -2,27 +2,27 @@
 import * as mongodb from 'mongodb';
 import * as model from '../model';
 import * as contracts from './contracts';
+import StoreBase from './store-base';
 
-class ParticipantStore implements contracts.IParticipantStore {
-    constructor(private participants: mongodb.Collection) { }
+class ParticipantStore extends StoreBase<model.IParticipant> implements contracts.IParticipantStore {
+    constructor(participants: mongodb.Collection) { 
+        super(participants);
+    }
 
-    public async add(participant: model.IParticipant): Promise<model.IParticipant> {
-        // Check validity of participant
-        let validationResult = model.isValidParticipant(participant, true);
-        if (!validationResult.isValid) {
-            throw validationResult.errorMessage;
-        }
-
-        await this.participants.insertOne(participant);
-        return participant;
+    public add(participant: model.IParticipant): Promise<model.IParticipant> {
+        return super.add(participant, model.isValidParticipant, e => {});
     }
 
     public async isAdmin(googleSubject: string): Promise<boolean> {
-        let result = await this.participants.find({
+        let result = await this.collection.find({
             googleSubject: googleSubject,
             roles: { isAdmin: true }
         }).limit(1).toArray();
         return result.length > 0;
+    }
+    
+    public async getAllSummary() : Promise<model.IParticipantSummary> {
+        return await this.collection.find({}).project({ givenName: true, familyName: true, email: true}).toArray();
     }
 }
 
