@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node ./dist/server.js",
-    "build": "gulp default"
+    "build": "gulp default",
+    "test": "jasmine JASMINE_CONFIG_PATH=./jasmine.json"
   },
   "repository": {
     "type": "git",
@@ -18,6 +19,7 @@
     "gulp": "^3.9.1",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-typescript": "^2.12.1",
+    "jasmine": "^2.4.1",
     "typescript": "^1.8.9",
     "typings": "^0.7.9"
   },
