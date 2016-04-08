@@ -122,6 +122,33 @@ paths:
           schema:
             $ref: '#/definitions/error'
   
+  /api/participants/{participantId}/checkin/{eventId}:
+    post:
+      description: Registers a new participant for an event
+      operationId: registerParticipant
+      produces:
+        - application/json
+      parameters:
+        - name: eventId
+          in: path
+          description: ID of the event
+          required: true
+          type: string
+        - name: participantId
+          in: path
+          description: ID of the participant
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Created registration
+        '404':
+          description: Event or participant not found
+        '500':
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/error'
+        
   /api/participants/summary:
     get:
       description: Returns a summary of all participants

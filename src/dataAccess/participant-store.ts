@@ -21,8 +21,22 @@ class ParticipantStore extends StoreBase<model.IParticipant> implements contract
         return result.length > 0;
     }
     
-    public async getAllSummary() : Promise<model.IParticipantSummary> {
+    public async getAllSummary() : Promise<model.IParticipantSummary[]> {
         return await this.collection.find({}).project({ givenName: true, familyName: true, email: true}).toArray();
+    }
+
+    public async getByName(givenName: string, familyName: string): Promise<model.IParticipant> {
+        let filter : any = { };
+        if (givenName) {
+            filter.givenName = givenName;
+        }
+        
+        if (familyName) {
+            filter.familyName = familyName;
+        }
+        
+        let result = await this.collection.find(filter).limit(1).toArray();
+        return (result.length !== 0) ? result[0] : null;
     }
 }
 

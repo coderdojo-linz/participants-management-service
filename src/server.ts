@@ -4,6 +4,7 @@ import * as bodyParser from "body-parser";
 import googleDevSignin from "./middleware/dev-token";
 import verifyGoogleJwt from "./middleware/verify-jwt";
 import ensureAdmin from "./middleware/ensure-admin";
+import eventbriteSync from "./middleware/eventbrite-sync";
 import * as config from "./config";
 import reviver from "./middleware/reviver";
 import addDataContext from "./middleware/add-data-context";
@@ -22,14 +23,19 @@ app.use(googleDevSignin);  // Login page for dev-purposes at /auth/devToken
 // Endpoint for initializing the DB. Will return an error if DB already initialized
 app.get("/admin/db-setup", verifyGoogleJwt, setupDb);
 
+// Endpoint for triggering Eventbrite sync
+app.post("/admin/eventbrite-sync", verifyGoogleJwt, ensureAdmin, eventbriteSync);
+
 // Events API
 app.get("/api/events", eventApi.getAll);
 app.get("/api/events/:_id", eventApi.getById);
 app.post("/api/events", verifyGoogleJwt, ensureAdmin, eventApi.add);
+app.get("/api/events/:_id/registrations", verifyGoogleJwt, ensureAdmin, eventApi.getRegistrations);
 
 // Participants API
 app.get("/api/participants/summary", verifyGoogleJwt, ensureAdmin, participantsApi.getAllSummary);
 app.post("/api/participants", verifyGoogleJwt, ensureAdmin, participantsApi.add);
+app.post("/api/participants/:participantId/checkin/:eventId", verifyGoogleJwt, ensureAdmin, participantsApi.checkIn);
 
 // Start express server
 var port: number = process.env.port || 1337;

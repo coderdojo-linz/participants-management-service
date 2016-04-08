@@ -56,3 +56,29 @@ export async function add(req: express.Request, res: express.Response, next: exp
         res.status(500).send({ error: err });
     }
 }
+
+export async function checkIn(req: express.Request, res: express.Response, next: express.NextFunction) {
+    try {
+        let dc = getDataContext(req);
+
+        let event = await dc.events.getById(req.params.eventId);
+        if (!event) {
+            res.status(404).send("Unknown event");
+            return;
+        }
+
+        let participant = await dc.participants.getById(req.params.participantId);
+        if (!participant) {
+            res.status(404).send("Unknown participant");
+            return;
+        }
+
+        var newCheckin = await dc.registrations.checkIn(event, participant);
+        res.status(200).send({
+            newCheckin: newCheckin,
+            givenName: participant.givenName
+        });
+    } catch (err) {
+        res.status(500).send({ error: err });
+    }
+}

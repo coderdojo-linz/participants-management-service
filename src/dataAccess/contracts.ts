@@ -7,6 +7,7 @@ export interface IDataContext {
     db: mongodb.Db;
     events: contracts.IEventStore;
     participants: contracts.IParticipantStore;
+    registrations: contracts.IRegistrationStore;
 }
 
 export interface IInitialAdmin {
@@ -17,6 +18,7 @@ export interface IInitialAdmin {
 }
 
 export interface IStoreBase<T> {
+    collection: mongodb.Collection;
     getById(_id: string): Promise<T>;
 }
 
@@ -30,5 +32,11 @@ export interface IParticipantStore extends IStoreBase<model.IParticipant> {
     isAdmin(googleSubject: string): Promise<boolean>;
     add(participant: model.IParticipant): Promise<model.IParticipant>;
     getById(_id: string): Promise<model.IParticipant>;
-    getAllSummary() : Promise<model.IParticipantSummary>;
+    getAllSummary(): Promise<model.IParticipantSummary>;
+    getByName(givenName: string, familyName: string): Promise<model.IParticipant>;
+}
+
+export interface IRegistrationStore extends IStoreBase<model.IRegistration> {
+    checkIn(event: model.IEvent, participant: model.IParticipant): Promise<any>;
+    getByEventId(eventId: string): Promise<model.IRegistration[]>;
 }

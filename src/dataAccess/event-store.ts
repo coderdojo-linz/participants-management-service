@@ -5,18 +5,18 @@ import * as contracts from './contracts';
 import StoreBase from './store-base';
 
 class EventStore extends StoreBase<model.IEvent> implements contracts.IEventStore {
-    constructor(events: mongodb.Collection) { 
+    constructor(events: mongodb.Collection) {
         super(events);
     }
 
     public async getAll(includePastEvents: boolean): Promise<model.IEvent[]> {
         if (includePastEvents) {
-            return await this.collection.find({}).toArray();
+            return await this.collection.find({}).sort({ "date": 1 }).toArray();
         } else {
             let now = new Date();
             let result = await this.collection.find({
                 date: { $gte: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())) }
-            }).toArray();
+            }).sort({ "date": 1 }).toArray();
 
             return result;
         }

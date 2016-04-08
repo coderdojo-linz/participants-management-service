@@ -16,10 +16,13 @@ gulp.task("clean", () => {
 
 // Compile Typescript files
 gulp.task("app", [], () => {
-    var tsResult = gulp.src(config.TS_SOURCES)
+    gulp.src(config.TS_SOURCES)
         .pipe(sourcemaps.init())
         .pipe(ts(tsClientProject))
         .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest(config.APP_DIST));
+        
+    gulp.src(["package.json"])
         .pipe(gulp.dest(config.APP_DIST));
 });
 

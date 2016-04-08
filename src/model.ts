@@ -104,7 +104,7 @@ export function isValidParticipant(participant: IParticipant, isNew: boolean): I
         return { isValid: false, errorMessage: "'familyName' is not of type 'string'." };
     }
 
-    if (typeof participant.googleSubject !== "string") {
+    if (participant.googleSubject && typeof participant.googleSubject !== "string") {
         return { isValid: false, errorMessage: "'googleSubject' is not of type 'string'." };
     }
 
@@ -118,5 +118,37 @@ export function isValidParticipant(participant: IParticipant, isNew: boolean): I
         }
     }
 
+    return { isValid: true };
+}
+
+export interface IRegistration extends IMongoObject {
+    event_id: ObjectID;
+    participant_id: ObjectID;
+    registered: boolean;
+    checkedin: boolean;
+}
+
+export function isValidRegistration(registration: IRegistration, isNew: boolean): IValidationResult {
+    var result = isValidMongoObject(registration, isNew);
+    if (!result.isValid) {
+        return result;
+    }
+
+    if (!registration.event_id) {
+        return { isValid: false, errorMessage: "Mandatory member 'event_id' is missing. Can only be left out for new objects." };
+    }
+
+    if (!(registration.event_id instanceof ObjectID)) {
+        return { isValid: false, errorMessage: "'event_id' is not of type 'ObjectID'." };
+    }
+
+    if (!registration.participant_id) {
+        return { isValid: false, errorMessage: "Mandatory member 'participant_id' is missing. Can only be left out for new objects." };
+    }
+
+    if (!(registration.participant_id instanceof ObjectID)) {
+        return { isValid: false, errorMessage: "'participant_id' is not of type 'ObjectID'." };
+    }
+    
     return { isValid: true };
 }

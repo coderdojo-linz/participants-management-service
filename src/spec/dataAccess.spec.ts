@@ -3,6 +3,8 @@ import * as mongodb from 'mongodb';
 import * as config from './config';
 import setupNewDatabase from '../dataAccess/db-setup';
 import EventStore from '../dataAccess/event-store';
+import ParticipantStore from '../dataAccess/participant-store';
+import RegistrationStore from '../dataAccess/registration-store';
 import * as model from '../model';
 
 // NOTE THAT THIS FILE CONTAINS INTEGRATION TESTS
@@ -68,6 +70,50 @@ describe("Data access", () => {
         done();
     });
 
+    it("can maintain participants", async (done) => {
+        // Delete participants collection if it already exists
+        let collections = await db.listCollections({ name: "participants" }).toArray();
+        if (collections.length > 0) {
+            await db.dropCollection("participants");
+        }
+
+        let participantCollection = db.collection("participants");
+        let participantStore = new ParticipantStore(participantCollection);
+        
+        // Create a participant
+        let participant : model.IParticipant = await participantStore.add({ givenName: "John", familyName: "Doe" });
+        expect(model.isValidParticipant(participant, false).isValid).toBeTruthy();
+
+        // Get participant using ID
+        var checkedInParticipant : any = await participantStore.getById(participant._id.toHexString());
+        expect(checkedInParticipant).not.toBeNull();
+        
+        // Get all participant
+        let participants = await participantStore.getAllSummary();
+        expect(participants.length).toBe(1);
+
+        done();
+    });
+
+    it("can maintain registrations", async (done) => {
+        // Delete registrations collection if it already exists
+        let collections = await db.listCollections({ name: "registrations" }).toArray();
+        if (collections.length > 0) {
+            await db.dropCollection("registrations");
+        }
+
+        let registrationCollection = db.collection("registrations");
+        let registrationStore = new RegistrationStore(registrationCollection);
+        
+        // Create a new registration
+        var dummyEvent : model.IEvent = { _id: new mongodb.ObjectID(), date: new Date(), location: "" };
+        var dummyParticipant : model.IParticipant = { _id: new mongodb.ObjectID(), givenName: "", familyName: "" };
+        expect(await registrationStore.checkIn(dummyEvent, dummyParticipant)).toBeTruthy();
+        expect(await registrationStore.checkIn(dummyEvent, dummyParticipant)).toBeFalsy();
+
+        done();
+    });
+    
     afterEach(async (done) => {
         await db.close();
         jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;

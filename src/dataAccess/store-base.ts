@@ -3,8 +3,8 @@ import * as mongodb from 'mongodb';
 import * as model from '../model';
 import * as contracts from './contracts';
 
-class StoreBase<T> implements contracts.IStoreBase<T> {
-    constructor(protected collection: mongodb.Collection) { }
+class StoreBase<T extends model.IMongoObject> implements contracts.IStoreBase<T> {
+    constructor(public collection: mongodb.Collection) { }
 
     public async add(item: T, validator: (o: T, isNew: boolean) => model.IValidationResult, prepare: (o: T) => void): Promise<T> {
         // Check validity of new item

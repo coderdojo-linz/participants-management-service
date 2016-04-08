@@ -58,3 +58,19 @@ export async function add(req: express.Request, res: express.Response, next: exp
         res.status(500).send({ error: err });
     }
 }
+
+export async function getRegistrations(req: express.Request, res: express.Response, next: express.NextFunction) {
+    try {
+        var dc = getDataContext(req);
+        var result = await dc.registrations.getByEventId(req.params._id);
+        if (!result || result.length == 0) {
+            // Not found
+            res.status(404).end();
+            return;
+        }
+        
+        return res.status(200).send(result);
+    } catch (err) {
+        res.status(500).send({ error: err });
+    }
+}

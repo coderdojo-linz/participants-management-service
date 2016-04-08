@@ -9,5 +9,7 @@ exports.CLEAN = [
     "!node_modules/**/*.js",
     "!Gulpfile.js",
     "!build/**/*.js",
-    "dist"
+    "dist/**",
+    "!dist",
+    "!dist/.git"
 ];
