@@ -3,6 +3,7 @@
 !Gulpfile.js
 !build/**/*.js
 **/*.js.map
+dist
 
 # Command file with environment variables (just used during development)
 SetEnv.cmd

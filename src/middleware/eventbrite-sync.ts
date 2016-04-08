@@ -27,7 +27,7 @@ interface IAttendeesResult {
     result: any[];
 }
 
-function fetchEventbriteAttendees(eventId: string, page: number) : Promise<IAttendeesResult> {
+function fetchEventbriteAttendees(eventId: string, page: number, ticketClass: string) : Promise<IAttendeesResult> {
     return new Promise<any>((resolve, reject) => {
         page = page || 1;
         needle.get(`https://www.eventbriteapi.com/v3/events/${eventId}/attendees/?page=${page}`, 
@@ -42,9 +42,22 @@ function fetchEventbriteAttendees(eventId: string, page: number) : Promise<IAtte
                         familyName: e.profile.last_name,
                         email: e.profile.email,
                         attending: e.status === "Attending",
-                        isCoder: e.ticket_class_id === "41874880"
+                        isCoder: e.ticket_class_id === ticketClass
                     } }).filter((e: any) => e.isCoder)
                 });
+            } else {
+                reject(err);
+            }
+        });
+    });
+}
+
+function fetchEventbriteTicketClasses(eventId: string) : Promise<any[]> {
+    return new Promise<any>((resolve, reject) => {
+        needle.get(`https://www.eventbriteapi.com/v3/events/${eventId}/ticket_classes/`, 
+            headers, (err, res) => {
+            if (!err && res.statusCode == 200) {
+                resolve(res.body.ticket_classes.map((e : any) => { return { id: e.id, name: e.name }; }));
             } else {
                 reject(err);
             }
@@ -67,7 +80,7 @@ async function eventbriteSync(req: express.Request, res: express.Response, next:
             event.date = new Date(Date.UTC(event.date.getUTCFullYear(), event.date.getUTCMonth(), event.date.getUTCDate()));
             
             // Upsert event
-            var eventResult = await dc.events.collection.findOneAndUpdate(
+            let eventResult = await dc.events.collection.findOneAndUpdate(
                 { eventbriteId: event.id }, 
                 { $set: { date: event.date, location: "Wissensturm Linz", eventbriteId: event.id } }, 
                 { upsert: true });
@@ -75,12 +88,16 @@ async function eventbriteSync(req: express.Request, res: express.Response, next:
                 ? eventResult.value
                 : await dc.events.getById(eventResult.lastErrorObject.upserted);
             
+            // Get ticket classes
+            let ticketClasses = await fetchEventbriteTicketClasses(event.id);
+            let coderTicketClass = ticketClasses.filter(tc => tc.name === "Coder")[0].id;
+            
             // Get attendees from Eventbrite
             let attendees : any[] = [];
             let ebResult: IAttendeesResult;
             let page = 0;
             do {
-                ebResult = await fetchEventbriteAttendees(event.id, ++page);
+                ebResult = await fetchEventbriteAttendees(event.id, ++page, coderTicketClass);
                 attendees = attendees.concat(ebResult.result);
             } while (page < ebResult.pageCount);
             for (let attendee of attendees) {
