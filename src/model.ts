@@ -36,6 +36,7 @@ export function isValidMongoObject(o: IMongoObject, isNew: boolean): IValidation
 export interface IEvent extends IMongoObject {
     date: Date;
     location: string;
+    eventbriteId?: string;
 }
 
 export function isValidEvent(event: IEvent, isNew: boolean): IValidationResult {
@@ -64,6 +65,10 @@ export function isValidEvent(event: IEvent, isNew: boolean): IValidationResult {
         return { isValid: false, errorMessage: "'location' is not of type 'string'." };
     }
 
+    if (event.eventbriteId && typeof event.eventbriteId !== "string") {
+        return { isValid: false, errorMessage: "'eventbriteId' is not of type 'string'." };
+    }
+
     return { isValid: true };
 }
 
@@ -71,14 +76,12 @@ export interface IParticipantRoles {
     isAdmin?: boolean;
 }
 
-export interface IParticipantSummary extends IMongoObject {
+export interface IParticipant extends IMongoObject {
     givenName?: string;
     familyName?: string;
     email?: string;
-}
-
-export interface IParticipant extends IParticipantSummary {
     googleSubject?: string;
+    eventbriteId?: string;
     roles?: IParticipantRoles;
 }
 
@@ -108,6 +111,10 @@ export function isValidParticipant(participant: IParticipant, isNew: boolean): I
         return { isValid: false, errorMessage: "'googleSubject' is not of type 'string'." };
     }
 
+    if (participant.eventbriteId && typeof participant.eventbriteId !== "string") {
+        return { isValid: false, errorMessage: "'eventbriteId' is not of type 'string'." };
+    }
+
     if (participant.roles) {
         if (typeof participant.roles !== "object") {
             return { isValid: false, errorMessage: "'roles' is not of type 'object'." };
@@ -121,11 +128,22 @@ export function isValidParticipant(participant: IParticipant, isNew: boolean): I
     return { isValid: true };
 }
 
+export interface IRegistrationEvent {
+    id: ObjectID;
+    date: Date;
+}
+
+export interface IRegistrationParticipant {
+    id: ObjectID;
+    givenName: string;
+    familyName: string;
+}
+
 export interface IRegistration extends IMongoObject {
-    event_id: ObjectID;
-    participant_id: ObjectID;
-    registered: boolean;
-    checkedin: boolean;
+    event: IRegistrationEvent;
+    participant: IRegistrationParticipant;
+    registered?: boolean;
+    checkedin?: boolean;
 }
 
 export function isValidRegistration(registration: IRegistration, isNew: boolean): IValidationResult {
@@ -134,20 +152,28 @@ export function isValidRegistration(registration: IRegistration, isNew: boolean)
         return result;
     }
 
-    if (!registration.event_id) {
-        return { isValid: false, errorMessage: "Mandatory member 'event_id' is missing. Can only be left out for new objects." };
+    if (!registration.event) {
+        return { isValid: false, errorMessage: "Mandatory member 'event' is missing." };
+    }
+    
+    if (!registration.event.id) {
+        return { isValid: false, errorMessage: "Mandatory member 'event.id' is missing." };
     }
 
-    if (!(registration.event_id instanceof ObjectID)) {
-        return { isValid: false, errorMessage: "'event_id' is not of type 'ObjectID'." };
+    if (!(registration.event.id instanceof ObjectID)) {
+        return { isValid: false, errorMessage: "'event.id' is not of type 'ObjectID'." };
     }
 
-    if (!registration.participant_id) {
-        return { isValid: false, errorMessage: "Mandatory member 'participant_id' is missing. Can only be left out for new objects." };
+    if (!registration.participant) {
+        return { isValid: false, errorMessage: "Mandatory member 'participant' is missing." };
     }
 
-    if (!(registration.participant_id instanceof ObjectID)) {
-        return { isValid: false, errorMessage: "'participant_id' is not of type 'ObjectID'." };
+    if (!registration.participant.id) {
+        return { isValid: false, errorMessage: "Mandatory member 'participant.id' is missing." };
+    }
+
+    if (!(registration.participant.id instanceof ObjectID)) {
+        return { isValid: false, errorMessage: "'participant.id' is not of type 'ObjectID'." };
     }
     
     return { isValid: true };

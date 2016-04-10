@@ -28,6 +28,16 @@ class RegistrationStore extends StoreBase<model.IRegistration> implements contra
             .project({ "_id": 1, "participant": 1, "registered": 1, "checkedin": 1 })
             .sort({ "participant.familyName": 1 }).toArray();
     }
+    
+    public async upsertByEventAndParticipant(registration: model.IRegistration): Promise<model.IParticipant> {
+        let upsertResult = await this.collection.findOneAndUpdate(
+            { "event.id": registration.event.id, "participant.id": registration.event.id },
+            { $set: registration },
+            { upsert: true });
+        return upsertResult.lastErrorObject.updatedExisting
+            ? upsertResult.value
+            : await this.getById(upsertResult.lastErrorObject.upserted);
+    }
 }
 
 export default RegistrationStore;

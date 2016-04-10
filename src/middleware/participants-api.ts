@@ -4,19 +4,6 @@ import * as contracts from "../dataAccess/contracts";
 import * as model from "../model";
 import getDataContext from "./get-data-context";
 
-export async function getAllSummary(req: express.Request, res: express.Response, next: express.NextFunction) {
-    try {
-        // Query db
-        let store = getDataContext(req).participants;
-        var result = await store.getAllSummary();
-
-        // Build result
-        res.status(200).send(result);
-    } catch (err) {
-        res.status(500).send({ error: err });
-    }
-}
-
 export async function getById(req: express.Request, res: express.Response, next: express.NextFunction) {
     try {
         // Query db

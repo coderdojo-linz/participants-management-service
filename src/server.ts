@@ -33,7 +33,6 @@ app.post("/api/events", verifyGoogleJwt, ensureAdmin, eventApi.add);
 app.get("/api/events/:_id/registrations", verifyGoogleJwt, ensureAdmin, eventApi.getRegistrations);
 
 // Participants API
-app.get("/api/participants/summary", verifyGoogleJwt, ensureAdmin, participantsApi.getAllSummary);
 app.post("/api/participants", verifyGoogleJwt, ensureAdmin, participantsApi.add);
 app.post("/api/participants/:participantId/checkin/:eventId", verifyGoogleJwt, ensureAdmin, participantsApi.checkIn);
 

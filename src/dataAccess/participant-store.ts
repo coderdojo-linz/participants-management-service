@@ -20,10 +20,6 @@ class ParticipantStore extends StoreBase<model.IParticipant> implements contract
         }).limit(1).toArray();
         return result.length > 0;
     }
-    
-    public async getAllSummary() : Promise<model.IParticipantSummary[]> {
-        return await this.collection.find({}).project({ givenName: true, familyName: true, email: true}).toArray();
-    }
 
     public async getByName(givenName: string, familyName: string): Promise<model.IParticipant> {
         let filter : any = { };
@@ -37,6 +33,19 @@ class ParticipantStore extends StoreBase<model.IParticipant> implements contract
         
         let result = await this.collection.find(filter).limit(1).toArray();
         return (result.length !== 0) ? result[0] : null;
+    }
+
+    public async upsertByName(participant: model.IParticipant): Promise<model.IParticipant> {
+        // Note that the following upsert does not set or modify the participant's roles.
+        // That's not a bug, it is intended.
+        let upsertResult = await this.collection.findOneAndUpdate(
+            { givenName: participant.givenName, familyName: participant.familyName }, 
+            { $set: { givenName: participant.givenName, familyName: participant.familyName, email: participant.email,
+                eventbriteId: participant.eventbriteId } }, 
+            { upsert: true });
+        return upsertResult.lastErrorObject.updatedExisting
+            ? upsertResult.value
+            : await this.getById(upsertResult.lastErrorObject.upserted);
     }
 }
 

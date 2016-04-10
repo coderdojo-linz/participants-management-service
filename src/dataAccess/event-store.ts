@@ -27,6 +27,16 @@ class EventStore extends StoreBase<model.IEvent> implements contracts.IEventStor
             // Ignore time part of event date
             event.date = new Date(Date.UTC(event.date.getUTCFullYear(), event.date.getUTCMonth(), event.date.getUTCDate())));
     }
+
+    public async upsertByEventbriteId(event: model.IEvent): Promise<model.IEvent> {
+        let upsertResult = await this.collection.findOneAndUpdate(
+            { eventbriteId: event.eventbriteId },
+            { $set: event },
+            { upsert: true });
+        return upsertResult.lastErrorObject.updatedExisting
+            ? upsertResult.value
+            : await this.getById(upsertResult.lastErrorObject.upserted);
+    }
 }
 
 export default EventStore;

@@ -87,10 +87,6 @@ describe("Data access", () => {
         // Get participant using ID
         var checkedInParticipant : any = await participantStore.getById(participant._id.toHexString());
         expect(checkedInParticipant).not.toBeNull();
-        
-        // Get all participant
-        let participants = await participantStore.getAllSummary();
-        expect(participants.length).toBe(1);
 
         done();
     });
