@@ -38,8 +38,15 @@ class ParticipantStore extends StoreBase<model.IParticipant> implements contract
     public async upsertByName(participant: model.IParticipant): Promise<model.IParticipant> {
         // Note that the following upsert does not set or modify the participant's roles.
         // That's not a bug, it is intended.
-        let set : any = { givenName: participant.givenName, familyName: participant.familyName, email: participant.email,
-            eventbriteId: participant.eventbriteId };
+        let set : any = { givenName: participant.givenName, familyName: participant.familyName };
+        if (typeof participant.email !== "undefined") {
+            set.email = participant.email;
+        }
+        
+        if (typeof participant.eventbriteId !== "undefined") {
+            set.eventbriteId = participant.eventbriteId;
+        }
+        
         if (typeof participant.yearOfBirth !== "undefined") {
             set.yearOfBirth = participant.yearOfBirth;
         }
