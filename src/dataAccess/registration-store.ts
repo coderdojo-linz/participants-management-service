@@ -30,9 +30,12 @@ class RegistrationStore extends StoreBase<model.IRegistration> implements contra
     }
     
     public async upsertByEventAndParticipant(registration: model.IRegistration): Promise<model.IParticipant> {
+        // Note that the following statement does not update the checkedin property.
+        // Use method checkIn for that.
         let upsertResult = await this.collection.findOneAndUpdate(
-            { "event.id": registration.event.id, "participant.id": registration.event.id },
-            { $set: registration },
+            { "event.id": registration.event.id, "participant.id": registration.participant.id },
+            { $set: { event: registration.event, participant: registration.participant,
+                registered: registration.registered } },
             { upsert: true });
         return upsertResult.lastErrorObject.updatedExisting
             ? upsertResult.value

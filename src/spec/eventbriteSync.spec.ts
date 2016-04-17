@@ -11,6 +11,20 @@ import * as contracts from '../dataAccess/contracts';
 // NOTE THAT THIS FILE CONTAINS INTEGRATION TESTS
 // The tests need access to a Mongo test DB. They will create/delete collections there.
 
+function fromResult<T>(item: T) : Promise<T> { 
+    return new Promise<T>((resolve, _) => {
+       resolve(item); 
+    });
+ }
+ 
+ function generateMockEventbrite(events: contracts.IEventbriteEvent[], attendees: contracts.IEventbriteAttendee[]) : contracts.IEventbrite {
+     return {
+        getEvents: () => fromResult(events),
+        getCoderTicketClass: (_) => fromResult("999"),
+        getAttendees: () => fromResult(attendees)    
+     };
+ }
+
 describe("Eventbrite synchronization", () => {
     var originalTimeout: number;
     var db: mongodb.Db;
@@ -40,7 +54,7 @@ describe("Eventbrite synchronization", () => {
             db: db,
             events: new EventStore(db.collection("events")),
             participants: new ParticipantStore(db.collection("participants")),
-            registrations: new RegistrationStore(db.collection("registrataions")),
+            registrations: new RegistrationStore(db.collection("registrations")),
             eventbrite: null
         };
         
@@ -49,26 +63,14 @@ describe("Eventbrite synchronization", () => {
 
     it("can perform simple sync", async (done) => {
         // Setup mock for data source
-        dc.eventbrite = {
-            getEvents: () => {
-                return new Promise<contracts.IEventbriteEvent[]>((resolve, _) => {
-                    resolve([
-                        { id: "1", date: new Date(Date.UTC(2016, 1, 1)) } 
-                    ]);  
-                });
-            },
-            getCoderTicketClass: (_) => new Promise<string>((resolve, _) => { resolve("999"); }),
-            getAttendees: (_, __) => {
-                return new Promise<contracts.IEventbriteAttendee[]>((resolve, _) => {
-                    resolve([
-                        { id: "10", givenName: "John", familyName: "Doe", email: "john.doe@dummy.com", attending: true, isCoder: true } 
-                    ]);  
-                });
-            }
-        };
+        dc.eventbrite = generateMockEventbrite(
+            [ { id: "1", date: new Date(Date.UTC(2016, 1, 1)) } ],  
+            [ { id: "10", givenName: "John", familyName: "Doe", email: "john.doe@dummy.com", attending: true, isCoder: true } ]);
         
+        // Execute
         await synchronize(dc);
         
+        // Check
         let events = await dc.events.getAll(true);
         expect(events.length).toBe(1);
         expect(events[0].eventbriteId).toBe("1");
@@ -85,7 +87,47 @@ describe("Eventbrite synchronization", () => {
 
         done();
     });
-    
+
+    it("can update registered state", async (done) => {
+        // Prepare database by inserting one event and one registration
+        let newEvent : model.IEvent = { _id: new mongodb.ObjectID(), date: new Date(Date.UTC(2016, 1, 1)),
+            location: "Wissensturm", eventbriteId: "1" };
+        dc.events.add(newEvent);
+        let newParticipant : model.IParticipant = { _id: new mongodb.ObjectID(), givenName: "John",
+            familyName: "Doe", email: "john.doe@dummy.com", googleSubject: "dummy" };
+        dc.participants.add(newParticipant)
+        let newReg : model.IRegistration = { _id: new mongodb.ObjectID(),
+            event: { id: newEvent._id, date: new Date(Date.UTC(2016, 1, 1)) },
+            participant: { id: newParticipant._id, givenName: newParticipant.givenName, familyName: newParticipant.familyName },
+            checkedin: true
+        }
+        dc.registrations.collection.insertOne(newReg);
+        
+        // Setup mock for data source
+        dc.eventbrite = generateMockEventbrite(
+            [ { id: newEvent.eventbriteId, date: newEvent.date } ],  
+            [ { id: newParticipant.eventbriteId, givenName: newParticipant.givenName, 
+                familyName: newParticipant.familyName, email: "j.doe@dummy.com", attending: true, isCoder: true } ]);
+        
+        // Execute
+        await synchronize(dc);
+        
+        // Check
+        let events = await dc.events.getAll(true);
+        expect(events.length).toBe(1);
+        
+        let participants : model.IParticipant[] = await dc.participants.collection.find({}).toArray();
+        expect(participants.length).toBe(1);
+        expect(participants[0].email).toBe("j.doe@dummy.com");
+        
+        let registrations = await dc.registrations.collection.find({}).toArray();
+        expect(registrations.length).toBe(1);
+        expect(registrations[0].registered).toBeTruthy();
+        expect(registrations[0].checkedin).toBeTruthy();
+
+        done();
+    });
+        
     afterEach(async (done) => {
         await db.close();
         jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
