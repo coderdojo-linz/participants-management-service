@@ -6,11 +6,11 @@ import getDataContext from "./get-data-context";
 
 export async function getAll(req: express.Request, res: express.Response, next: express.NextFunction) {
     try {
-        var includePastEvents = req.query.past && req.query.past === "true";
+        let includePastEvents = req.query.past && req.query.past === "true";
 
         // Query db
         let store = getDataContext(req).events;
-        var result = await store.getAll(includePastEvents);
+        let result = await store.getAll(includePastEvents);
 
         // Build result
         res.status(200).send(result);
@@ -22,8 +22,8 @@ export async function getAll(req: express.Request, res: express.Response, next: 
 export async function getById(req: express.Request, res: express.Response, next: express.NextFunction) {
     try {
         // Query db
-        var store = getDataContext(req).events;
-        var result = await store.getById(req.params._id);
+        let store = getDataContext(req).events;
+        let result = await store.getById(req.params._id);
 
         // Build result
         if (result) {
@@ -61,8 +61,8 @@ export async function add(req: express.Request, res: express.Response, next: exp
 
 export async function getRegistrations(req: express.Request, res: express.Response, next: express.NextFunction) {
     try {
-        var dc = getDataContext(req);
-        var result = await dc.registrations.getByEventId(req.params._id);
+        let dc = getDataContext(req);
+        let result = await dc.registrations.getByEventId(req.params._id);
         if (!result || result.length == 0) {
             // Not found
             res.status(404).end();
@@ -70,6 +70,56 @@ export async function getRegistrations(req: express.Request, res: express.Respon
         }
         
         return res.status(200).send(result);
+    } catch (err) {
+        res.status(500).send({ error: err });
+    }
+}
+
+export async function addRegistration(req: express.Request, res: express.Response, next: express.NextFunction) {
+    try {
+        let dc = getDataContext(req);
+        
+        // Load event based on event ID
+        let event = await dc.events.getById(req.params._id);
+        if (!event) {
+            // Not found
+            res.status(404).end();
+            return;
+        }
+        
+        // Make sure participant is there 
+        if (!req.body.participant) {
+            // Bad request
+            res.status(400).send({ message: "Missing member 'participant'" });
+            return;
+        }
+        
+        // Check if participant is valid
+        let participant : model.IParticipant = req.body.participant;
+        let validation = model.isValidParticipant(participant, true);
+        if (!validation.isValid) {
+            // Bad request
+            res.status(400).send({ message: validation.errorMessage });
+            return;
+        }
+        
+        // Upsert participant
+        participant = await dc.participants.upsertByName(participant);
+        
+        // Upsert registration
+        let registration = await dc.registrations.upsertByEventAndParticipant({ 
+            event: { id: event._id, date: event.date },
+            participant: { id: participant._id, givenName: participant.givenName, familyName: participant.familyName },
+            registered: true,
+            needsComputer: req.body.needsComputer
+        });
+        
+        // Check participant in
+        if (req.body.checkedin) {
+            await dc.registrations.checkIn(event, participant);
+        }
+        
+        return res.status(201).end();
     } catch (err) {
         res.status(500).send({ error: err });
     }

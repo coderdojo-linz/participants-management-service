@@ -11,6 +11,9 @@ import addDataContext from "./middleware/add-data-context";
 import * as eventApi from "./middleware/events-api";
 import * as participantsApi from "./middleware/participants-api";
 import setupDb from "./middleware/db-setup-api";
+import * as appinsights from "applicationinsights";
+
+appinsights.setup(config.APP_INSIGHTS_KEY).start();
 
 var app = express();
 
@@ -31,6 +34,7 @@ app.get("/api/events", eventApi.getAll);
 app.get("/api/events/:_id", eventApi.getById);
 app.post("/api/events", verifyGoogleJwt, ensureAdmin, eventApi.add);
 app.get("/api/events/:_id/registrations", verifyGoogleJwt, ensureAdmin, eventApi.getRegistrations);
+app.post("/api/events/:_id/registrations", verifyGoogleJwt, ensureAdmin, eventApi.addRegistration);
 
 // Participants API
 app.post("/api/participants", verifyGoogleJwt, ensureAdmin, participantsApi.add);

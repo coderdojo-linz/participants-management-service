@@ -25,18 +25,22 @@ class RegistrationStore extends StoreBase<model.IRegistration> implements contra
     
     public async getByEventId(eventId: string): Promise<model.IRegistration[]> {
         return await this.collection.find({ "event.id": new mongodb.ObjectID(eventId) })
-            .project({ "_id": 1, "participant": 1, "registered": 1, "checkedin": 1 })
+            .project({ "_id": 1, "participant": 1, "registered": 1, "checkedin": 1, "needsComputer": 1 })
             .sort({ "participant.familyName": 1 }).toArray();
     }
     
-    public async upsertByEventAndParticipant(registration: model.IRegistration): Promise<model.IParticipant> {
+    public async upsertByEventAndParticipant(registration: model.IRegistration): Promise<model.IRegistration> {
         // Note that the following statement does not update the checkedin property.
         // Use method checkIn for that.
+        let set : any = { event: registration.event, participant: registration.participant,
+                registered: registration.registered };
+        if (typeof registration.needsComputer !== "undefined") {
+            set.needsComputer = registration.needsComputer;
+        }
+        
         let upsertResult = await this.collection.findOneAndUpdate(
             { "event.id": registration.event.id, "participant.id": registration.participant.id },
-            { $set: { event: registration.event, participant: registration.participant,
-                registered: registration.registered } },
-            { upsert: true });
+            { $set: set }, { upsert: true });
         return upsertResult.lastErrorObject.updatedExisting
             ? upsertResult.value
             : await this.getById(upsertResult.lastErrorObject.upserted);

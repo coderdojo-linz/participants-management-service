@@ -83,6 +83,7 @@ export interface IParticipant extends IMongoObject {
     googleSubject?: string;
     eventbriteId?: string;
     roles?: IParticipantRoles;
+    yearOfBirth?: string;
 }
 
 export function isValidParticipant(participant: IParticipant, isNew: boolean): IValidationResult {
@@ -144,6 +145,7 @@ export interface IRegistration extends IMongoObject {
     participant: IRegistrationParticipant;
     registered?: boolean;
     checkedin?: boolean;
+    needsComputer?: boolean;
 }
 
 export function isValidRegistration(registration: IRegistration, isNew: boolean): IValidationResult {

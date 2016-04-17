@@ -65,7 +65,8 @@ describe("Eventbrite synchronization", () => {
         // Setup mock for data source
         dc.eventbrite = generateMockEventbrite(
             [ { id: "1", date: new Date(Date.UTC(2016, 1, 1)) } ],  
-            [ { id: "10", givenName: "John", familyName: "Doe", email: "john.doe@dummy.com", attending: true, isCoder: true } ]);
+            [ { id: "10", givenName: "John", familyName: "Doe", email: "john.doe@dummy.com", 
+                attending: true, needsComputer: true, yearOfBirth: "1990" } ]);
         
         // Execute
         await synchronize(dc);
@@ -79,11 +80,13 @@ describe("Eventbrite synchronization", () => {
         expect(participants.length).toBe(1);
         expect(participants[0].eventbriteId).toBe("10");
         expect(participants[0].roles).toBeUndefined();
+        expect(participants[0].yearOfBirth).toBe("1990");
         
-        let registrations = await dc.registrations.getByEventId(events[0]._id.toHexString());
+        let registrations : model.IRegistration[] = await dc.registrations.collection.find({}).toArray();
         expect(registrations.length).toBe(1);
         expect(registrations[0].registered).toBeTruthy();
         expect(registrations[0].participant.familyName).toBe("Doe");
+        expect(registrations[0].needsComputer).toBeTruthy();
 
         done();
     });
@@ -94,7 +97,7 @@ describe("Eventbrite synchronization", () => {
             location: "Wissensturm", eventbriteId: "1" };
         dc.events.add(newEvent);
         let newParticipant : model.IParticipant = { _id: new mongodb.ObjectID(), givenName: "John",
-            familyName: "Doe", email: "john.doe@dummy.com", googleSubject: "dummy" };
+            familyName: "Doe", email: "john.doe@dummy.com", googleSubject: "dummy", yearOfBirth: "1990" };
         dc.participants.add(newParticipant)
         let newReg : model.IRegistration = { _id: new mongodb.ObjectID(),
             event: { id: newEvent._id, date: new Date(Date.UTC(2016, 1, 1)) },
@@ -107,7 +110,8 @@ describe("Eventbrite synchronization", () => {
         dc.eventbrite = generateMockEventbrite(
             [ { id: newEvent.eventbriteId, date: newEvent.date } ],  
             [ { id: newParticipant.eventbriteId, givenName: newParticipant.givenName, 
-                familyName: newParticipant.familyName, email: "j.doe@dummy.com", attending: true, isCoder: true } ]);
+                familyName: newParticipant.familyName, email: "j.doe@dummy.com", attending: true,
+                needsComputer: true } ]);
         
         // Execute
         await synchronize(dc);
@@ -118,12 +122,14 @@ describe("Eventbrite synchronization", () => {
         
         let participants : model.IParticipant[] = await dc.participants.collection.find({}).toArray();
         expect(participants.length).toBe(1);
-        expect(participants[0].email).toBe("j.doe@dummy.com");
+        expect(participants[0].email).toBe("j.doe@dummy.com");  // Must have been updated
+        expect(participants[0].yearOfBirth).toBe("1990");       // Must be unchanged
         
-        let registrations = await dc.registrations.collection.find({}).toArray();
+        let registrations : model.IRegistration[] = await dc.registrations.collection.find({}).toArray();
         expect(registrations.length).toBe(1);
-        expect(registrations[0].registered).toBeTruthy();
-        expect(registrations[0].checkedin).toBeTruthy();
+        expect(registrations[0].registered).toBeTruthy();       // Must have been set
+        expect(registrations[0].checkedin).toBeTruthy();        // Must be unchanged
+        expect(registrations[0].needsComputer).toBeTruthy();    // Must have been set
 
         done();
     });

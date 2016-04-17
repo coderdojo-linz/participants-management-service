@@ -54,7 +54,8 @@ export interface IEventbriteAttendee {
     familyName: string;
     email: string;
     attending: boolean;
-    isCoder: boolean;
+    yearOfBirth?: string;
+    needsComputer?: boolean;
 }
 
 export interface IEventbritePagedResult<T> {
@@ -66,6 +67,11 @@ export interface IEventbritePagedResult<T> {
 export interface IEventbriteTicketClass {
     id: string;
     name: string;
+}
+
+export interface IEventbriteQuestions {
+    yearOfBirthQuestionId?: string;
+    needsComputerQuestionId?: string;
 }
 
 export interface IEventbrite {

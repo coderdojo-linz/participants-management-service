@@ -23,13 +23,13 @@ async function synchronize(dc: contracts.IDataContext) : Promise<any> {
             // Upsert participant
             let dbParticipant = await dc.participants.upsertByName({ 
                 givenName: attendee.givenName, familyName: attendee.familyName, 
-                email: attendee.email, eventbriteId: attendee.id });
+                email: attendee.email, eventbriteId: attendee.id, yearOfBirth: attendee.yearOfBirth });
                         
             // Upsert registration
             let registration : model.IRegistration = { 
                     event: { id: dbEvent._id, date: dbEvent.date }, 
                     participant: { id: dbParticipant._id, givenName: dbParticipant.givenName, familyName: dbParticipant.familyName }, 
-                    registered: attendee.attending 
+                    registered: attendee.attending, needsComputer: attendee.needsComputer
                 };
             await dc.registrations.upsertByEventAndParticipant(registration);
         }

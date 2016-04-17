@@ -21,23 +21,39 @@ class Eventbrite implements contracts.IEventbrite {
         });
     }
 
-    private getAttendeesPaged(eventId: string, page: number, ticketClass: string) : Promise<contracts.IEventbritePagedResult<contracts.IEventbriteAttendee>> {
+    private getAttendeesPaged(eventId: string, page: number, ticketClass: string, questions: contracts.IEventbriteQuestions) : Promise<contracts.IEventbritePagedResult<contracts.IEventbriteAttendee>> {
         return new Promise<any>((resolve, reject) => {
             page = page || 1;
             needle.get(`https://www.eventbriteapi.com/v3/events/${eventId}/attendees/?page=${page}`, 
                 Eventbrite.headers, (err, res) => {
                 if (!err && res.statusCode == 200) {
-                    resolve({
-                        pageNumber: res.body.pagination.page_number,
-                        pageCount: res.body.pagination.page_count,
-                        result: res.body.attendees.map((e : any) => { return { 
+                    let result : contracts.IEventbriteAttendee[] = [];
+                    for(let e of res.body.attendees.filter((e: any) => e.ticket_class_id === ticketClass)) {
+                        let resultItem : contracts.IEventbriteAttendee = { 
                             id: e.id,
                             givenName: e.profile.first_name,
                             familyName: e.profile.last_name,
                             email: e.profile.email,
-                            attending: e.status === "Attending",
-                            isCoder: e.ticket_class_id === ticketClass
-                        } }).filter((e: any) => e.isCoder)
+                            attending: e.status === "Attending"
+                        };
+                        
+                        for (let a of e.answers) {
+                            if (a.question_id === questions.yearOfBirthQuestionId && a.answer) {
+                                resultItem.yearOfBirth = a.answer;
+                            }
+                            
+                            if (a.question_id === questions.needsComputerQuestionId && a.answer) {
+                                resultItem.needsComputer = a.answer === config.EVENTBRITE_QUESTION_YES;
+                            }
+                        }
+                        
+                        result.push(resultItem);
+                    }
+                    
+                    resolve({
+                        pageNumber: res.body.pagination.page_number,
+                        pageCount: res.body.pagination.page_count,
+                        result: result
                     });
                 } else {
                     reject(err);
@@ -46,12 +62,35 @@ class Eventbrite implements contracts.IEventbrite {
         });
     }
     
+    async getQuestions(eventId: string) : Promise<contracts.IEventbriteQuestions> {
+        return new Promise<any>((resolve, reject) => {
+            needle.get(`https://www.eventbriteapi.com/v3/events/${eventId}/questions/`, 
+                Eventbrite.headers, (err, res) => {
+                    if (!err && res.statusCode == 200) {
+                        let result : contracts.IEventbriteQuestions = { };
+                        for(var e of res.body.questions) {
+                            if (e.question.text.indexOf(config.EVENTBRITE_QUESTION_YEAR_OF_BIRTH) > (-1)) {
+                                result.yearOfBirthQuestionId = e.id;
+                            } else if (e.question.text.indexOf(config.EVENTBRITE_QUESTION_NEEDS_COMPUTER) > (-1)) {
+                                result.needsComputerQuestionId = e.id;
+                            }
+                        }
+                        
+                        resolve(result);
+                    } else {
+                        reject(err);
+                    }
+                });
+        });        
+    }
+    
     async getAttendees(eventId: string, coderTicketClass: string) : Promise<contracts.IEventbriteAttendee[]> {
         let attendees : contracts.IEventbriteAttendee[] = [];
         let ebResult: contracts.IEventbritePagedResult<contracts.IEventbriteAttendee>;
         let page = 0;
+        let questions = await this.getQuestions(eventId);
         do {
-            ebResult = await this.getAttendeesPaged(eventId, ++page, coderTicketClass);
+            ebResult = await this.getAttendeesPaged(eventId, ++page, coderTicketClass, questions);
             attendees = attendees.concat(ebResult.result);
         } while (page < ebResult.pageCount);
         

@@ -16,7 +16,7 @@ async function ensureAdmin(req: express.Request, res: express.Response, next: ex
     if (await participants.isAdmin(req.user.sub)) {
         next();
     } else {
-        res.status(401).send("User is no administrator.")
+        res.status(401).send({ message: "User is no administrator." })
     }
 }
 
