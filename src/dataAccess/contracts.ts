@@ -41,6 +41,7 @@ export interface IRegistrationStore extends IStoreBase<model.IRegistration> {
     checkIn(event: model.IEvent, participant: model.IParticipant): Promise<any>;
     getByEventId(eventId: string): Promise<model.IRegistration[]>;
     upsertByEventAndParticipant(registration: model.IRegistration): Promise<model.IParticipant>;
+    getNumberOfCheckins(participantId: mongodb.ObjectID) : Promise<number>;
 }
 
 export interface IEventbriteEvent {

@@ -106,6 +106,8 @@ describe("Data access", () => {
         var dummyParticipant : model.IParticipant = { _id: new mongodb.ObjectID(), givenName: "", familyName: "" };
         expect(await registrationStore.checkIn(dummyEvent, dummyParticipant)).toBeTruthy();
         expect(await registrationStore.checkIn(dummyEvent, dummyParticipant)).toBeFalsy();
+        expect(await registrationStore.getNumberOfCheckins(dummyParticipant._id)).toBe(1);
+        expect(await registrationStore.getNumberOfCheckins(new mongodb.ObjectID())).toBe(0);
 
         done();
     });

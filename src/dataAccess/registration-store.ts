@@ -23,6 +23,10 @@ class RegistrationStore extends StoreBase<model.IRegistration> implements contra
         return true;
     }
     
+    public async getNumberOfCheckins(participantId: mongodb.ObjectID) : Promise<number> {
+        return await this.collection.find({ "participant.id": participantId, checkedin: true }).project({ _id: 0, checkedin: 1}).count(false);
+    }
+    
     public async getByEventId(eventId: string): Promise<model.IRegistration[]> {
         return await this.collection.find({ "event.id": new mongodb.ObjectID(eventId) })
             .project({ "_id": 1, "participant": 1, "registered": 1, "checkedin": 1, "needsComputer": 1 })

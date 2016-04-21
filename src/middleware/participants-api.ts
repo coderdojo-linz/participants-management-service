@@ -63,7 +63,8 @@ export async function checkIn(req: express.Request, res: express.Response, next:
         var newCheckin = await dc.registrations.checkIn(event, participant);
         res.status(200).send({
             newCheckin: newCheckin,
-            givenName: participant.givenName
+            givenName: participant.givenName,
+            numberOfCheckins: await dc.registrations.getNumberOfCheckins(participant._id)
         });
     } catch (err) {
         res.status(500).send({ error: err });
