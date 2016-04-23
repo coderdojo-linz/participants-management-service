@@ -4,9 +4,9 @@ import * as needle from "needle";
 import * as chalk from "chalk";
 import * as config from "../config";
 
-var certs: any;
+let certs: any;
 
-function fetchGoogleCertsAsync() : Promise<any> {
+function fetchGoogleCertsAsync(): Promise<any> {
     console.log("Getting OAuth2 certfs from Google...")
     return new Promise<any>((resolve, reject) => {
         needle.get("https://www.googleapis.com/oauth2/v1/certs", (err, res) => {
@@ -23,31 +23,45 @@ function fetchGoogleCertsAsync() : Promise<any> {
     });
 }
 
+async function refreshGoogleCerts(res: express.Response): Promise<boolean> {
+    try {
+        certs = await fetchGoogleCertsAsync();
+        return true;
+    } catch (err) {
+        res.status(500).send("Could not get cert from Google");
+        return false;
+    }
+}
+
 async function google(req: express.Request, res: express.Response, next: express.NextFunction) {
-    var authorizationHeader = req.header("Authorization");
+    let authorizationHeader = req.header("Authorization");
     if (authorizationHeader) {
-        var indexOfSeparator = authorizationHeader.indexOf(" ");
+        let indexOfSeparator = authorizationHeader.indexOf(" ");
         if (indexOfSeparator > 0 && authorizationHeader.substring(0, indexOfSeparator) == "Bearer") {
-            var token = authorizationHeader.substring(indexOfSeparator + 1);
-            var decodedToken = jwt.decode(token, { complete: true });
+            let token = authorizationHeader.substring(indexOfSeparator + 1);
+            let decodedToken = jwt.decode(token, { complete: true });
             if (decodedToken) {
-                if (!certs) {
-                    try {
-                    certs = await fetchGoogleCertsAsync();
-                    } catch (err) {
-                        res.status(500).send("Could not get cert from Google.");
+                // Get Google certs if cert cache is empty
+                if (!certs && !(await refreshGoogleCerts(res))) {
+                    return;
+                }
+
+                let alg = decodedToken.header.alg;
+                let kid = decodedToken.header.kid;
+                if (!certs[kid]) {
+                    // Cert is not available in cache -> refresh cache
+                    if (!(await refreshGoogleCerts(res))) {
                         return;
                     }
                 }
-
-                var alg = decodedToken.header.alg;
-                var kid = decodedToken.header.kid;
+                
                 if (certs[kid]) {
-                    var cert = certs[kid];
+                    let cert = certs[kid];
                     try {
-                        var verifiedToken = jwt.verify(token, cert, { 
+                        let verifiedToken = jwt.verify(token, cert, {
                             audience: config.GOOGLE_APP_ID,
-                            issuer: "accounts.google.com" });
+                            issuer: "accounts.google.com"
+                        });
                         if (verifiedToken.email_verified) {
                             req.user = verifiedToken;
                             next();
