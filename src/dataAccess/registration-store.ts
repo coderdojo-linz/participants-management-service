@@ -1,4 +1,4 @@
-/// <reference path="../../typings/main.d.ts" />
+/// <reference path="../../typings/index.d.ts" />
 import * as mongodb from 'mongodb';
 import * as model from '../model';
 import * as contracts from './contracts';
@@ -27,10 +27,29 @@ class RegistrationStore extends StoreBase<model.IRegistration> implements contra
         return await this.collection.find({ "participant.id": participantId, checkedin: true }).project({ _id: 0, checkedin: 1}).count(false);
     }
     
-    public async getByEventId(eventId: string): Promise<model.IRegistration[]> {
-        return await this.collection.find({ "event.id": new mongodb.ObjectID(eventId) })
+    public async getTotalNumberOfCheckins() : Promise<contracts.ITotalRegistrations[]> {
+        return await this.collection.aggregate([
+            { $match: { checkedin: true } },
+            { $group: { _id: "$participant.id", totalNumberOfCheckins: { $sum: 1 }} }
+        ]).toArray();
+    }
+    
+    public async getByEventId(eventId: string, includeStatistics?: boolean): Promise<model.IRegistration[]> {
+        var result = await this.collection.find({ "event.id": new mongodb.ObjectID(eventId) })
             .project({ "_id": 1, "participant": 1, "registered": 1, "checkedin": 1, "needsComputer": 1 })
             .sort({ "participant.familyName": 1 }).toArray();
+        
+        if (includeStatistics) {
+            var stats = await this.getTotalNumberOfCheckins();
+            result.forEach(r => {
+                var participantStats = stats.filter(tr => tr._id.equals(r.participant.id));
+                if (participantStats && participantStats.length > 0) {
+                    r.totalNumberOfCheckins = participantStats[0].totalNumberOfCheckins;
+                }
+            });
+        }
+
+        return result;
     }
     
     public async upsertByEventAndParticipant(registration: model.IRegistration): Promise<model.IRegistration> {

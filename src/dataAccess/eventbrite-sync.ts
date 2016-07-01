@@ -1,4 +1,4 @@
-/// <reference path="../../typings/main.d.ts" />
+/// <reference path="../../typings/index.d.ts" />
 import * as mongodb from 'mongodb';
 import * as contracts from './contracts';
 import * as model from '../model';

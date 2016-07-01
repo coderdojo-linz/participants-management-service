@@ -1,4 +1,4 @@
-/// <reference path="../../typings/main.d.ts" />
+/// <reference path="../../typings/index.d.ts" />
 import * as express from "express";
 import * as contracts from "../dataAccess/contracts";
 import * as model from "../model";
@@ -61,14 +61,16 @@ export async function add(req: express.Request, res: express.Response, next: exp
 
 export async function getRegistrations(req: express.Request, res: express.Response, next: express.NextFunction) {
     try {
+        let includeStatistics = req.query.stats && req.query.stats === "true";
+
         let dc = getDataContext(req);
-        let result = await dc.registrations.getByEventId(req.params._id);
+        let result = await dc.registrations.getByEventId(req.params._id, includeStatistics);
         if (!result || result.length == 0) {
             // Not found
             res.status(404).end();
             return;
         }
-        
+
         return res.status(200).send(result);
     } catch (err) {
         res.status(500).send({ error: err });

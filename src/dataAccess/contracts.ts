@@ -1,4 +1,4 @@
-/// <reference path="../../typings/main.d.ts" />
+/// <reference path="../../typings/index.d.ts" />
 import * as mongodb from 'mongodb';
 import * as model from '../model';
 
@@ -39,9 +39,15 @@ export interface IParticipantStore extends IStoreBase<model.IParticipant> {
 
 export interface IRegistrationStore extends IStoreBase<model.IRegistration> {
     checkIn(event: model.IEvent, participant: model.IParticipant): Promise<any>;
-    getByEventId(eventId: string): Promise<model.IRegistration[]>;
+    getByEventId(eventId: string, includeStatistics?: boolean): Promise<model.IRegistration[]>;
     upsertByEventAndParticipant(registration: model.IRegistration): Promise<model.IParticipant>;
     getNumberOfCheckins(participantId: mongodb.ObjectID) : Promise<number>;
+    getTotalNumberOfCheckins() : Promise<ITotalRegistrations[]>;
+}
+
+export interface ITotalRegistrations {
+    _id: mongodb.ObjectID,
+    totalNumberOfCheckins: number;
 }
 
 export interface IEventbriteEvent {

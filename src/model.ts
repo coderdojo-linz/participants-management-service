@@ -1,4 +1,4 @@
-/// <reference path="../typings/main.d.ts" />
+/// <reference path="../typings/index.d.ts" />
 import { ObjectID } from 'mongodb';
 
 /**
@@ -146,6 +146,7 @@ export interface IRegistration extends IMongoObject {
     registered?: boolean;
     checkedin?: boolean;
     needsComputer?: boolean;
+    totalNumberOfCheckins?: number;
 }
 
 export function isValidRegistration(registration: IRegistration, isNew: boolean): IValidationResult {

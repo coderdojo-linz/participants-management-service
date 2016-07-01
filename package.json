@@ -23,7 +23,7 @@
     "gulp-sourcemaps": "^1.6.0",
     "gulp-typescript": "^2.12.1",
     "jasmine": "^2.4.1",
-    "typescript": "^1.8.9",
+    "typescript": "^1.8.10",
     "typings": "^0.7.9"
   },
   "dependencies": {
