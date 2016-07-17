@@ -23,6 +23,18 @@ class StoreBase<T extends model.IMongoObject> implements contracts.IStoreBase<T>
         let result = await this.collection.find({ _id: new mongodb.ObjectID(_id) }).limit(1).toArray();
         return (result.length !== 0) ? result[0] : null;
     }
+
+    protected fixCasing(s: string) : string {
+        if (s.length !== 0) {
+            return s.substr(0, 1).toUpperCase() + s.substr(1).toLowerCase();
+        } else {
+            return s;
+        }
+    }
+
+    protected escapeRegexString(s: string) : string {
+        return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+    }
 }
 
 export default StoreBase;

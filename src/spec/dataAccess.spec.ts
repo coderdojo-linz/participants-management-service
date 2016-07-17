@@ -5,10 +5,21 @@ import setupNewDatabase from '../dataAccess/db-setup';
 import EventStore from '../dataAccess/event-store';
 import ParticipantStore from '../dataAccess/participant-store';
 import RegistrationStore from '../dataAccess/registration-store';
+import StoreBase from '../dataAccess/store-base';
 import * as model from '../model';
 
 // NOTE THAT THIS FILE CONTAINS INTEGRATION TESTS
 // The tests need access to a Mongo test DB. They will create/delete collections there.
+
+class EscapeMock extends StoreBase<model.IParticipant> {
+    public tryEscape(s: string) : string {
+        return this.escapeRegexString(s);
+    }
+
+    public tryFixCasing(s: string) : string {
+        return this.fixCasing(s);
+    }
+}
 
 describe("Data access", () => {
     var originalTimeout: number;
@@ -20,6 +31,18 @@ describe("Data access", () => {
         
         db = await mongodb.MongoClient.connect(config.MONGO_TEST_URL);
         done();
+    });
+
+    it("escapes strings for regex correctly", () => {
+        var escaper = new EscapeMock(null);
+
+        expect(escaper.tryEscape("^test.[Aa]+test$")).toBe("\\^test\\.\\[Aa\\]\\+test\\$");
+    });
+
+    it("fixes casing correctly", () => {
+        var fixer = new EscapeMock(null);
+
+        expect(fixer.tryFixCasing("jOHN")).toBe("John");
     });
 
     it("can setup empty database", async (done) => {
@@ -80,13 +103,19 @@ describe("Data access", () => {
         let participantCollection = db.collection("participants");
         let participantStore = new ParticipantStore(participantCollection);
         
-        // Create a participant
-        let participant : model.IParticipant = await participantStore.add({ givenName: "John", familyName: "Doe" });
-        expect(model.isValidParticipant(participant, false).isValid).toBeTruthy();
+        // Create participants. Note that second participant has blanks in its name
+        let participant1 : model.IParticipant = await participantStore.add({ givenName: "John", familyName: "Doe" });
+        expect(model.isValidParticipant(participant1, false).isValid).toBeTruthy();
+        let participant2 : model.IParticipant = await participantStore.add({ givenName: "Jane ", familyName: " Smith" });
+        expect(model.isValidParticipant(participant2, false).isValid).toBeTruthy();
 
         // Get participant using ID
-        var checkedInParticipant : any = await participantStore.getById(participant._id.toHexString());
+        var checkedInParticipant : any = await participantStore.getById(participant1._id.toHexString());
         expect(checkedInParticipant).not.toBeNull();
+        checkedInParticipant = await participantStore.getById(participant2._id.toHexString());
+        expect(checkedInParticipant).not.toBeNull();
+        expect(checkedInParticipant.givenName).toBe("Jane");
+        expect(checkedInParticipant.familyName).toBe("Smith");
 
         done();
     });

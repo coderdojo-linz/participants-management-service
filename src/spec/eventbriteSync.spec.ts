@@ -66,7 +66,12 @@ describe("Eventbrite synchronization", () => {
         dc.eventbrite = generateMockEventbrite(
             [ { id: "1", date: new Date(Date.UTC(2016, 1, 1)) } ],  
             [ { id: "10", givenName: "John", familyName: "Doe", email: "john.doe@dummy.com", 
-                attending: true, needsComputer: true, yearOfBirth: "1990" } ]);
+                attending: true, needsComputer: true, yearOfBirth: "1990" },
+              { id: "20", givenName: "JOHN ", familyName: " DOE", email: "jdoe@dummy.com", 
+                attending: true, needsComputer: false, yearOfBirth: "1990" },
+              { id: "30", givenName: "jANE ", familyName: " Smith", email: " jane.smith@dummy.com ", 
+                attending: true, needsComputer: false, yearOfBirth: "1990" }
+            ]);
         
         // Execute
         await synchronize(dc);
@@ -77,16 +82,24 @@ describe("Eventbrite synchronization", () => {
         expect(events[0].eventbriteId).toBe("1");
         
         let participants : model.IParticipant[] = await dc.participants.collection.find({}).toArray();
-        expect(participants.length).toBe(1);
-        expect(participants[0].eventbriteId).toBe("10");
+        expect(participants.length).toBe(2);
+        expect(participants[0].eventbriteId).toBe("20");
         expect(participants[0].roles).toBeUndefined();
         expect(participants[0].yearOfBirth).toBe("1990");
+        expect(participants[0].givenName).toBe("John");
+        expect(participants[0].familyName).toBe("Doe");
+        expect(participants[0].email).toBe("jdoe@dummy.com");
         
         let registrations : model.IRegistration[] = await dc.registrations.collection.find({}).toArray();
-        expect(registrations.length).toBe(1);
+        expect(registrations.length).toBe(2);
         expect(registrations[0].registered).toBeTruthy();
+        expect(registrations[0].participant.givenName).toBe("John");
         expect(registrations[0].participant.familyName).toBe("Doe");
-        expect(registrations[0].needsComputer).toBeTruthy();
+        expect(registrations[0].needsComputer).toBeFalsy();
+        expect(registrations[1].registered).toBeTruthy();
+        expect(registrations[1].participant.givenName).toBe("Jane");
+        expect(registrations[1].participant.familyName).toBe("Smith");
+        expect(registrations[1].needsComputer).toBeFalsy();
 
         done();
     });
