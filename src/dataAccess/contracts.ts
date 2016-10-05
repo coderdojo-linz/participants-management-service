@@ -37,12 +37,18 @@ export interface IParticipantStore extends IStoreBase<model.IParticipant> {
     upsertByName(participant: model.IParticipant): Promise<model.IParticipant>;
 }
 
+export interface IRegistrationStatistics {
+    _id: mongodb.ObjectID;
+    totalNumberOfCheckins: number;
+}
+
 export interface IRegistrationStore extends IStoreBase<model.IRegistration> {
     checkIn(event: model.IEvent, participant: model.IParticipant): Promise<any>;
     getByEventId(eventId: string, includeStatistics?: boolean): Promise<model.IRegistration[]>;
     upsertByEventAndParticipant(registration: model.IRegistration): Promise<model.IParticipant>;
     getNumberOfCheckins(participantId: mongodb.ObjectID) : Promise<number>;
     getTotalNumberOfCheckins() : Promise<ITotalRegistrations[]>;
+    getStatistics(checkinLimit?: number): Promise<IRegistrationStatistics[]>;
 }
 
 export interface ITotalRegistrations {

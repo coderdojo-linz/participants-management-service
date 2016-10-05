@@ -86,6 +86,13 @@ export interface IParticipant extends IMongoObject {
     yearOfBirth?: string;
 }
 
+export interface IParticipantStatistics extends IMongoObject {
+    givenName?: string;
+    familyName?: string;
+    email?: string;
+    totalNumberOfCheckins: number;
+}
+
 export function isValidParticipant(participant: IParticipant, isNew: boolean): IValidationResult {
     var result = isValidMongoObject(participant, isNew);
     if (!result.isValid) {

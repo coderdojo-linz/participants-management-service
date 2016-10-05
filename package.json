@@ -21,10 +21,10 @@
     "del": "^2.2.0",
     "gulp": "^3.9.1",
     "gulp-sourcemaps": "^1.6.0",
-    "gulp-typescript": "^2.12.1",
+    "gulp-typescript": "^3.0.2",
     "jasmine": "^2.4.1",
-    "typescript": "^1.8.10",
-    "typings": "^0.7.9"
+    "typescript": "^2.0.3",
+    "typings": "^1.4.0"
   },
   "dependencies": {
     "applicationinsights": "^0.15.14",

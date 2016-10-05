@@ -18,7 +18,7 @@ gulp.task("clean", () => {
 gulp.task("app", [], () => {
     gulp.src(config.TS_SOURCES)
         .pipe(sourcemaps.init())
-        .pipe(ts(tsClientProject))
+        .pipe(tsClientProject())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(config.APP_DIST));
         

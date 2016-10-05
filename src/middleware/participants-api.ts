@@ -70,3 +70,33 @@ export async function checkIn(req: express.Request, res: express.Response, next:
         res.status(500).send({ error: err });
     }
 }
+
+export async function getStatistics(req: express.Request, res: express.Response, next: express.NextFunction) {
+    try {
+        let dc = getDataContext(req);
+        let checkinLimit = 0;
+        if (req.query.checkinLimit) {
+            checkinLimit = parseInt(req.query.checkinLimit);
+            if (isNaN(checkinLimit)) {
+                checkinLimit = 0;
+            }
+        }
+
+        let rawResults = await dc.registrations.getStatistics(checkinLimit);
+        let results: model.IParticipantStatistics[] = [];
+        for (let row of rawResults) {
+            var participant = await dc.participants.getById(row._id.toHexString());
+            results.push({
+                _id: participant._id,
+                givenName: participant.givenName,
+                familyName: participant.familyName,
+                email: participant.email,
+                totalNumberOfCheckins: row.totalNumberOfCheckins
+            });
+        }
+
+        res.status(200).send(results);
+    } catch (err) {
+        res.status(500).send({ error: err });
+    }
+}

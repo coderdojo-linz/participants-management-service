@@ -39,6 +39,7 @@ app.post("/api/events/:_id/registrations", verifyGoogleJwt, ensureAdmin, eventAp
 // Participants API
 app.post("/api/participants", verifyGoogleJwt, ensureAdmin, participantsApi.add);
 app.post("/api/participants/:participantId/checkin/:eventId", verifyGoogleJwt, ensureAdmin, participantsApi.checkIn);
+app.get("/api/participants/statistics", verifyGoogleJwt, ensureAdmin, participantsApi.getStatistics);
 
 // Start express server
 var port: number = process.env.port || 1337;

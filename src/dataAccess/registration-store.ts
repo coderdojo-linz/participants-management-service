@@ -68,6 +68,19 @@ class RegistrationStore extends StoreBase<model.IRegistration> implements contra
             ? upsertResult.value
             : await this.getById(upsertResult.lastErrorObject.upserted);
     }
+
+    public async getStatistics(checkinLimit?: number): Promise<contracts.IRegistrationStatistics[]> {
+        let selector: any[] = [
+            { $match: { checkedin: true } },
+            { $group: { _id: "$participant.id", total: { $sum: 1 } } }
+        ];
+        if (checkinLimit) {
+            selector.push({ $match: { total: { "$gte": checkinLimit } } });
+        }
+
+        let result = await this.collection.aggregate(selector).toArray();
+        return result.map(row => { return { _id: row._id, totalNumberOfCheckins: row.total }; });
+    }
 }
 
 export default RegistrationStore;
