@@ -15,10 +15,10 @@ async function synchronize(dc: contracts.IDataContext) : Promise<any> {
             { date: event.date, location: "Wissensturm Linz", eventbriteId: event.id });
         
         // Get ticket classes and finder ticket class for coders (excludes e.g. parents)
-        let coderTicketClass = await dc.eventbrite.getCoderTicketClass(event.id);
+        let coderTicketClasses = await dc.eventbrite.getCoderTicketClasses(event.id);
         
         // Get attendees from Eventbrite for current event
-        let attendees = await dc.eventbrite.getAttendees(event.id, coderTicketClass);
+        let attendees = await dc.eventbrite.getAttendees(event.id, coderTicketClasses);
         for (let attendee of attendees) {
             // Upsert participant
             let dbParticipant = await dc.participants.upsertByName({ 

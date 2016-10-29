@@ -89,6 +89,6 @@ export interface IEventbriteQuestions {
 
 export interface IEventbrite {
      getEvents() : Promise<IEventbriteEvent[]>;
-     getAttendees(eventId: string, coderTicketClass: string) : Promise<IEventbriteAttendee[]>;
-     getCoderTicketClass(eventId: string) : Promise<string>;
+     getAttendees(eventId: string, coderTicketClasses: string[]) : Promise<IEventbriteAttendee[]>;
+     getCoderTicketClasses(eventId: string) : Promise<string[]>;
 }

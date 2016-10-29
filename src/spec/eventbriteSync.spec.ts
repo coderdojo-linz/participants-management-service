@@ -20,8 +20,14 @@ function fromResult<T>(item: T) : Promise<T> {
  function generateMockEventbrite(events: contracts.IEventbriteEvent[], attendees: contracts.IEventbriteAttendee[]) : contracts.IEventbrite {
      return {
         getEvents: () => fromResult(events),
-        getCoderTicketClass: (_) => fromResult("999"),
-        getAttendees: () => fromResult(attendees)    
+        getCoderTicketClasses: (_) => fromResult(["998","999"]),
+        getAttendees: (_: string, coderTicketClasses: string[]) => {
+            if (coderTicketClasses.length !== 2 || coderTicketClasses[0] !== "998" || coderTicketClasses[1] !== "999") {
+                throw "Invalid ticket classes";
+            }
+
+            return fromResult(attendees);
+        }    
      };
  }
 
