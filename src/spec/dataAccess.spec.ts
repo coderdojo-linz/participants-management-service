@@ -1,4 +1,3 @@
-/// <reference path="../../typings/index.d.ts" />
 import * as mongodb from 'mongodb';
 import * as config from './config';
 import setupNewDatabase from '../dataAccess/db-setup';

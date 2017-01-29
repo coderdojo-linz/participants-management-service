@@ -1,4 +1,3 @@
-/// <reference path="../../typings/index.d.ts" />
 import * as mongodb from 'mongodb';
 import * as chalk from 'chalk';
 import * as contracts from './contracts';

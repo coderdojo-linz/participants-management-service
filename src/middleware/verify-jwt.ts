@@ -63,7 +63,7 @@ async function google(req: express.Request, res: express.Response, next: express
                             issuer: "accounts.google.com"
                         });
                         if (verifiedToken.email_verified) {
-                            req.user = verifiedToken;
+                            (<any>req).user = verifiedToken;
                             next();
                         } else {
                             res.status(400).send("We require a verified email in Google.");

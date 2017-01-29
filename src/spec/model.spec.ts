@@ -1,4 +1,3 @@
-/// <reference path="../../typings/index.d.ts" />
 import * as model from '../model';
 import { ObjectID } from 'mongodb';
 

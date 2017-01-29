@@ -1,4 +1,3 @@
-/// <reference path="../../typings/index.d.ts" />
 import * as express from "express";
 import * as mongodb from 'mongodb';
 import EventStore from '../dataAccess/event-store';
