@@ -60,6 +60,12 @@ export interface IEventbriteEvent {
     date: Date;
 }
 
+export interface IEventbriteEventStatus {
+    eventId: string;
+    quantitySold: number;
+    quantityTotal: number;
+}
+
 export interface IEventbriteAttendee {
     id: string;
     givenName: string;
@@ -90,4 +96,5 @@ export interface IEventbrite {
      getEvents() : Promise<IEventbriteEvent[]>;
      getAttendees(eventId: string, coderTicketClasses: string[]) : Promise<IEventbriteAttendee[]>;
      getCoderTicketClasses(eventId: string) : Promise<string[]>;
+     getTicketClassStatuses(eventIds: string[]): Promise<IEventbriteEventStatus[]>;
 }

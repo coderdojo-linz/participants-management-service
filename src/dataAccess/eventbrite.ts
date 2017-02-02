@@ -9,10 +9,41 @@ class Eventbrite implements contracts.IEventbrite {
 
     getEvents(): Promise<contracts.IEventbriteEvent[]> {
         return new Promise<any>((resolve, reject) => {
-            needle.get(`https://www.eventbriteapi.com/v3/series/${config.EVENTBRITE_SERIES_ID}/events/?time_filter=current_future`,
+            needle.get(`https://www.eventbriteapi.com/v3/series/${config.EVENTBRITE_SERIES_ID}/events/?time_filter=current_future&order_by=start_asc`,
                 Eventbrite.headers, (err, res) => {
                     if (!err && res.statusCode == 200) {
                         resolve(res.body.events.map((e: any) => { return { id: e.id, date: new Date(e.start.utc) } }));
+                    } else {
+                        reject();
+                    }
+                });
+        });
+    }
+
+    async getTicketClassStatuses(eventIds: string[]): Promise<contracts.IEventbriteEventStatus[]> {
+        const statuses = await Promise.all(eventIds.map(
+            e => this.getTicketClassStatus(e, config.CODER_TICKET_CLASS_NAME)));
+        return eventIds.map(e => {
+            const status = statuses.filter(s => s.eventId == e)[0];
+            return { eventId: e, quantitySold: status.quantitySold, quantityTotal: status.quantityTotal };
+        });
+    }
+
+    private getTicketClassStatus(eventId: string, ticketClass: string): Promise<contracts.IEventbriteEventStatus> {
+        return new Promise<any>(async (resolve, reject) => {
+            const ticketClasses = await this.getCoderTicketClasses(eventId, ticketClass);
+            if (ticketClasses.length != 1) {
+                reject();
+            }
+
+            needle.get(`https://www.eventbriteapi.com/v3/events/${eventId}/ticket_classes/${ticketClasses[0]}/`,
+                Eventbrite.headers, (err, res) => {
+                    if (!err && res.statusCode == 200) {
+                        resolve({
+                            eventId: res.body.event_id,
+                            quantitySold: res.body.quantity_sold,
+                            quantityTotal: res.body.quantity_total
+                        });
                     } else {
                         reject();
                     }
@@ -111,13 +142,19 @@ class Eventbrite implements contracts.IEventbrite {
         });
     }
 
-    async getCoderTicketClasses(eventId: string): Promise<string[]> {
+    async getCoderTicketClasses(eventId: string, ticketClassName: string = null): Promise<string[]> {
         let ticketClasses = await this.getTicketClasses(eventId);
         if (!ticketClasses || ticketClasses.length == 0) {
             throw `No ticket classes found for event ${eventId}`;
         }
 
-        let classNames: string[] = config.CODER_TICKET_CLASS_NAMES.split('|');
+        let classNames: string[];
+        if (!ticketClassName) {
+            classNames = config.CODER_TICKET_CLASS_NAMES.split('|');
+        } else {
+            classNames = [ticketClassName];
+        }
+
         if (!classNames.length) {
             throw `Ticket class cofiguration ${config.CODER_TICKET_CLASS_NAMES} is invalid`;
         }

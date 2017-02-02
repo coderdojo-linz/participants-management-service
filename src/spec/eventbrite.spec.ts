@@ -59,6 +59,18 @@ describe("Eventbrite", () => {
         done();
     });
     
+    it("can read ticket class status", async (done) => {
+        let eb = new Eventbrite();
+        const statuses = await eb.getTicketClassStatuses([testEventId]);
+        expect(statuses).toBeTruthy();
+        expect(statuses.length).toBe(1);
+        expect(statuses[0].quantityTotal).toBeGreaterThan(0);
+        expect(statuses[0].quantitySold).toBeLessThanOrEqual(statuses[0].quantityTotal);
+
+        done();
+    });
+
+    
     afterEach(() => {
         jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
     });

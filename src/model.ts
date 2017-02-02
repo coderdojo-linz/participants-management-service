@@ -36,6 +36,8 @@ export interface IEvent extends IMongoObject {
     date: Date;
     location: string;
     eventbriteId?: string;
+    quantitySold?: number;
+    quantityTotal?: number;    
 }
 
 export function isValidEvent(event: IEvent, isNew: boolean): IValidationResult {
