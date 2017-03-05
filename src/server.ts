@@ -1,9 +1,7 @@
 import * as express from "express";
 import * as cors from "cors";
 import * as bodyParser from "body-parser";
-import googleDevSignin from "./middleware/dev-token";
-import verifyGoogleJwt from "./middleware/verify-jwt";
-import ensureAdmin from "./middleware/ensure-admin";
+import ensureAdmin from './middleware/ensure-admin';
 import eventbriteSync from "./middleware/eventbrite-sync";
 import * as config from "./config";
 import reviver from "./middleware/reviver";
@@ -12,34 +10,35 @@ import * as eventApi from "./middleware/events-api";
 import * as participantsApi from "./middleware/participants-api";
 import setupDb from "./middleware/db-setup-api";
 import * as appinsights from "applicationinsights";
+import * as jwt from "express-jwt";
 
 appinsights.setup(config.APP_INSIGHTS_KEY).start();
 
 var app = express();
+const jwtCheck = jwt({ secret: config.AUTH0_SECRET, audience: config.AUTH0_CLIENT });
 
 // Create express server
 app.use(cors());
 var bodyParserOptions = { reviver: reviver };
 app.use(bodyParser.json(bodyParserOptions));
-app.use(googleDevSignin);  // Login page for dev-purposes at /auth/devToken
 
 // Endpoint for initializing the DB. Will return an error if DB already initialized
-app.get("/admin/db-setup", verifyGoogleJwt, setupDb);
+app.get("/admin/db-setup", jwtCheck, setupDb);
 
 // Endpoint for triggering Eventbrite sync
-app.post("/admin/eventbrite-sync", verifyGoogleJwt, ensureAdmin, eventbriteSync);
+app.post("/admin/eventbrite-sync", jwtCheck, ensureAdmin, eventbriteSync);
 
 // Events API
 app.get("/api/events", eventApi.getAll);
 app.get("/api/events/:_id", eventApi.getById);
-app.post("/api/events", verifyGoogleJwt, ensureAdmin, eventApi.add);
-app.get("/api/events/:_id/registrations", verifyGoogleJwt, ensureAdmin, eventApi.getRegistrations);
-app.post("/api/events/:_id/registrations", verifyGoogleJwt, ensureAdmin, eventApi.addRegistration);
+app.post("/api/events", jwtCheck, ensureAdmin, eventApi.add);
+app.get("/api/events/:_id/registrations", jwtCheck, ensureAdmin, eventApi.getRegistrations);
+app.post("/api/events/:_id/registrations", jwtCheck, ensureAdmin, eventApi.addRegistration);
 
 // Participants API
-app.post("/api/participants", verifyGoogleJwt, ensureAdmin, participantsApi.add);
-app.post("/api/participants/:participantId/checkin/:eventId", verifyGoogleJwt, ensureAdmin, participantsApi.checkIn);
-app.get("/api/participants/statistics", verifyGoogleJwt, ensureAdmin, participantsApi.getStatistics);
+app.post("/api/participants", jwtCheck, ensureAdmin, participantsApi.add);
+app.post("/api/participants/:participantId/checkin/:eventId", jwtCheck, ensureAdmin, participantsApi.checkIn);
+app.get("/api/participants/statistics", jwtCheck, ensureAdmin, participantsApi.getStatistics);
 
 // Start express server
 var port: number = process.env.port || 1337;

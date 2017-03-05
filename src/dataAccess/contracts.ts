@@ -29,7 +29,6 @@ export interface IEventStore extends IStoreBase<model.IEvent> {
 }
 
 export interface IParticipantStore extends IStoreBase<model.IParticipant> {
-    isAdmin(googleSubject: string): Promise<boolean>;
     add(participant: model.IParticipant): Promise<model.IParticipant>;
     getById(_id: string): Promise<model.IParticipant>;
     getByName(givenName: string, familyName: string): Promise<model.IParticipant>;

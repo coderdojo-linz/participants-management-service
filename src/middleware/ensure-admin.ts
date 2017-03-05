@@ -3,21 +3,23 @@ import * as chalk from "chalk";
 import getDataContext from "./get-data-context";
 
 async function ensureAdmin(req: express.Request, res: express.Response, next: express.NextFunction) {
-    if (!(<any>req).user) {
-        throw "Not authenticated";
+    const user = (<any>req).user;
+    if (!user) {
+        res.status(401).send({ message: "Not authenticated" });
+        return;
     }
 
-    if (!(<any>req).user.sub) {
-        throw "Google subject not found in token.";
-
+    if (!user.roles || !Array.isArray(user.roles)) {
+        res.status(400).send({ message: "No roles in token" });
+        return;
     }
 
-    let participants = getDataContext(req).participants;
-    if (await participants.isAdmin((<any>req).user.sub)) {
-        next();
-    } else {
-        res.status(401).send({ message: "User is no administrator." })
+    if ((<string[]>(user.roles)).indexOf("admin") === (-1)) {
+        res.status(403).send({ message: "User is no administrator." });
+        return;
     }
+
+    next();
 }
 
 export default ensureAdmin;

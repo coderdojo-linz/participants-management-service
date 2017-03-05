@@ -19,14 +19,6 @@ class ParticipantStore extends StoreBase<model.IParticipant> implements contract
         return super.add(participant, model.isValidParticipant, e => {});
     }
 
-    public async isAdmin(googleSubject: string): Promise<boolean> {
-        let result = await this.collection.find({
-            googleSubject: googleSubject,
-            roles: { isAdmin: true }
-        }).limit(1).toArray();
-        return result.length > 0;
-    }
-
     public async getByName(givenName: string, familyName: string): Promise<model.IParticipant> {
         let filter : any = { };
         if (givenName) {
