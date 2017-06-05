@@ -99,3 +99,13 @@ export async function getStatistics(req: express.Request, res: express.Response,
         res.status(500).send({ error: err });
     }
 }
+
+export async function getGenderStatistics(req: express.Request, res: express.Response, next: express.NextFunction) {
+    try {
+        let dc = getDataContext(req);
+        let results = await dc.registrations.getGenderStatistics();
+        res.status(200).send(results);
+    } catch (err) {
+        res.status(500).send({ error: err });
+    }
+}

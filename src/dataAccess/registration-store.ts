@@ -80,6 +80,27 @@ class RegistrationStore extends StoreBase<model.IRegistration> implements contra
         let result = await this.collection.aggregate(selector).toArray();
         return result.map(row => { return { _id: row._id, totalNumberOfCheckins: row.total }; });
     }
+
+    public async getGenderStatistics(): Promise<contracts.IGenderStatistics[]> {
+        const result = await this.collection.aggregate([
+            { $lookup: { from: 'participants', localField: 'participant.id', foreignField: '_id', as: 'participantOrig' } },
+            { $unwind : "$participantOrig" },
+            { $group: { 
+                _id: { eventId: '$event.id', date: '$event.date', gender: { $ifNull: [ '$participantOrig.gender', 'u' ] }, checkedin: 'checkedin' }, 
+                registered: { $sum: { $cond: { if: '$registered', then: 1, else: 0 } } },
+                checkedin: { $sum: { $cond: { if: '$checkedin', then: 1, else: 0 } } } } 
+            },
+            { $sort: { '_id.date': 1, '_id.gender': 1 } }
+        ]).toArray();
+
+        return result.map(row => { return { 
+            eventId: row._id.eventId,
+            eventDate: row._id.date,
+            gender: row._id.gender,
+            registered: row.registered,
+            checkedin: row.checkedin
+        } });
+    }
 }
 
 export default RegistrationStore;

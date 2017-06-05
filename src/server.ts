@@ -39,6 +39,7 @@ app.post("/api/events/:_id/registrations", jwtCheck, ensureAdmin, eventApi.addRe
 app.post("/api/participants", jwtCheck, ensureAdmin, participantsApi.add);
 app.post("/api/participants/:participantId/checkin/:eventId", jwtCheck, ensureAdmin, participantsApi.checkIn);
 app.get("/api/participants/statistics", jwtCheck, ensureAdmin, participantsApi.getStatistics);
+app.get("/api/participants/statistics/gender", participantsApi.getGenderStatistics);
 
 // Start express server
 var port: number = process.env.port || 1337;

@@ -47,11 +47,20 @@ export interface IRegistrationStore extends IStoreBase<model.IRegistration> {
     getNumberOfCheckins(participantId: mongodb.ObjectID) : Promise<number>;
     getTotalNumberOfCheckins() : Promise<ITotalRegistrations[]>;
     getStatistics(checkinLimit?: number): Promise<IRegistrationStatistics[]>;
+    getGenderStatistics(): Promise<IGenderStatistics[]>;
 }
 
 export interface ITotalRegistrations {
     _id: mongodb.ObjectID,
     totalNumberOfCheckins: number;
+}
+
+export interface IGenderStatistics {
+    eventId: mongodb.ObjectID,
+    eventDate: Date,
+    gender: string,
+    registered: number,
+    checkedin: number
 }
 
 export interface IEventbriteEvent {

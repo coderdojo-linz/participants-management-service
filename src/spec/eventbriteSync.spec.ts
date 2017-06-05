@@ -122,19 +122,20 @@ describe("Eventbrite synchronization", () => {
             _id: new mongodb.ObjectID(), date: new Date(Date.UTC(2016, 1, 1)),
             location: "Wissensturm", eventbriteId: "1"
         };
-        dc.events.add(newEvent);
+        await dc.events.add(newEvent);
+
         let newParticipant: model.IParticipant = {
             _id: new mongodb.ObjectID(), givenName: "John",
             familyName: "Doe", email: "john.doe@dummy.com", googleSubject: "dummy", yearOfBirth: "1990"
         };
-        dc.participants.add(newParticipant)
+        await dc.participants.add(newParticipant)
         let newReg: model.IRegistration = {
             _id: new mongodb.ObjectID(),
             event: { id: newEvent._id, date: new Date(Date.UTC(2016, 1, 1)) },
             participant: { id: newParticipant._id, givenName: newParticipant.givenName, familyName: newParticipant.familyName },
             checkedin: true
         }
-        dc.registrations.collection.insertOne(newReg);
+        await dc.registrations.collection.insertOne(newReg);
 
         // Setup mock for data source
         dc.eventbrite = generateMockEventbrite(

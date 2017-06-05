@@ -85,6 +85,7 @@ export interface IParticipant extends IMongoObject {
     eventbriteId?: string;
     roles?: IParticipantRoles;
     yearOfBirth?: string;
+    gender?: string;
 }
 
 export interface IParticipantStatistics extends IMongoObject {

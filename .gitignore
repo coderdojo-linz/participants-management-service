@@ -6,7 +6,7 @@
 dist
 
 # Command file with environment variables (just used during development)
-SetEnv.cmd
+SetEnv.*
 
 # VSCode
 .vscode
