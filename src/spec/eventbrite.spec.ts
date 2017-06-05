@@ -65,7 +65,11 @@ describe("Eventbrite", () => {
         expect(statuses).toBeTruthy();
         expect(statuses.length).toBe(1);
         expect(statuses[0].quantityTotal).toBeGreaterThan(0);
-        expect(statuses[0].quantitySold).toBeLessThanOrEqual(statuses[0].quantityTotal);
+        
+        // The following expectation has been removed because we changed
+        // the quantity total afterwards. Therefore, quantity total
+        // can be lower than quantity sold.
+        //expect(statuses[0].quantitySold).toBeLessThanOrEqual(statuses[0].quantityTotal);
 
         done();
     });
