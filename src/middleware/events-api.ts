@@ -78,9 +78,7 @@ export async function getRegistrations(req: express.Request, res: express.Respon
         let dc = getDataContext(req);
         let result = await dc.registrations.getByEventId(req.params._id, includeStatistics);
         if (!result || result.length == 0) {
-            // Not found
-            res.status(404).end();
-            return;
+            result = [];
         }
 
         return res.status(200).send(result);
