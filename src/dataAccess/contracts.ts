@@ -7,6 +7,7 @@ export interface IDataContext {
     participants: IParticipantStore;
     registrations: IRegistrationStore;
     eventbrite: IEventbrite;
+    clients: IClientStore;
 }
 
 export interface IInitialAdmin {
@@ -48,6 +49,10 @@ export interface IRegistrationStore extends IStoreBase<model.IRegistration> {
     getTotalNumberOfCheckins() : Promise<ITotalRegistrations[]>;
     getStatistics(checkinLimit?: number): Promise<IRegistrationStatistics[]>;
     getGenderStatistics(): Promise<IGenderStatistics[]>;
+}
+
+export interface IClientStore extends IStoreBase<model.IClientApp> {
+    getByApiKey(apiKey: string): Promise<model.IClientApp>;
 }
 
 export interface ITotalRegistrations {

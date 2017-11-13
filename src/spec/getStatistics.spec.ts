@@ -40,6 +40,7 @@ describe("Get statistics", () => {
             events: new EventStore(db.collection("events")),
             participants: new ParticipantStore(db.collection("participants")),
             registrations: new RegistrationStore(db.collection("registrations")),
+            clients: null,
             eventbrite: null
         };
 

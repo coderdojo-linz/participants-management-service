@@ -37,7 +37,7 @@ describe("Eventbrite", () => {
         expect(filteredTicketClasses[1]).toBe('999');
     });
 
-    it("can read events", async (done) => {
+    xit("can read events", async (done) => {
         let eb = new Eventbrite();
         let events = await eb.getEvents();
         expect(events.length).toBeGreaterThan(0);

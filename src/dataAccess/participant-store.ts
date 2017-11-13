@@ -52,6 +52,10 @@ class ParticipantStore extends StoreBase<model.IParticipant> implements contract
             set.yearOfBirth = participant.yearOfBirth;
         }
 
+        if (typeof participant.gender !== "undefined") {
+            set.gender = participant.gender;
+        }
+
         let upsertResult = await this.collection.findOneAndUpdate(
             { 
                 givenName: { $regex: ["^", super.escapeRegexString(this.fixCasing(participant.givenName.trim())), "$"].join(""), $options: "i" }, 

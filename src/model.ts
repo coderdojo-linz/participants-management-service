@@ -190,3 +190,8 @@ export function isValidRegistration(registration: IRegistration, isNew: boolean)
     
     return { isValid: true };
 }
+
+export interface IClientApp extends IMongoObject {
+    apiKey: string;
+    clientDescription: string;
+}
