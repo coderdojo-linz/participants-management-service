@@ -8,6 +8,7 @@ import reviver from "./middleware/reviver";
 import addDataContext from "./middleware/add-data-context";
 import * as eventApi from "./middleware/events-api";
 import * as participantsApi from "./middleware/participants-api";
+import * as sessions from "./middleware/sessionpicker-api";
 import setupDb from "./middleware/db-setup-api";
 import * as appinsights from "applicationinsights";
 import * as jwt from "express-jwt";
@@ -18,6 +19,7 @@ appinsights.setup(config.APP_INSIGHTS_KEY).start();
 var app = express();
 const jwtCheck = jwt({ secret: config.AUTH0_SECRET, audience: config.AUTH0_CLIENT });
 const jwtOptionalCheck = jwt({ secret: config.AUTH0_SECRET, audience: config.AUTH0_CLIENT, credentialsRequired: false });
+const jwtCheckSessionpicker = jwt({ secret: config.AUTH0_SECRET_SESSIONPICKER, audience: config.AUTH0_CLIENT_SESSIONPICKER });
 
 // Create express server
 app.use(cors());
@@ -42,6 +44,13 @@ app.post("/api/participants", jwtCheck, ensureAdmin, participantsApi.add);
 app.post("/api/participants/:participantId/checkin/:eventId", jwtCheck, ensureAdmin, participantsApi.checkIn);
 app.get("/api/participants/statistics", jwtCheck, ensureAdmin, participantsApi.getStatistics);
 app.get("/api/participants/statistics/gender", participantsApi.getGenderStatistics);
+
+// Sessionpicker API
+app.post("/api/sessions/events/:eventId", jwtCheckSessionpicker, sessions.add);
+app.get("/api/sessions/events/:eventId", jwtCheckSessionpicker, sessions.getForEvent);
+app.get("/api/sessions/events/:eventId/users/:userId", jwtCheckSessionpicker, sessions.getForUser);
+app.get("/api/sessions/:_id", jwtCheckSessionpicker, sessions.getById);
+app.delete("/api/sessions/:_id", jwtCheckSessionpicker, sessions.deleteById);
 
 // Start express server
 var port: any = process.env.port || 1337;

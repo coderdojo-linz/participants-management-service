@@ -6,6 +6,7 @@ import ParticipantStore from '../dataAccess/participant-store';
 import RegistrationStore from '../dataAccess/registration-store';
 import StoreBase from '../dataAccess/store-base';
 import * as model from '../model';
+import SessionStore from '../dataAccess/session-store';
 
 // NOTE THAT THIS FILE CONTAINS INTEGRATION TESTS
 // The tests need access to a Mongo test DB. They will create/delete collections there.
@@ -141,7 +142,38 @@ describe("Data access", () => {
 
         done();
     });
-    
+
+    it("can maintain sessions", async (done) => {
+        // Delete sessions collection if it already exists
+        let collections = await db.listCollections({ name: "sessions" }).toArray();
+        if (collections.length > 0) {
+            await db.dropCollection("sessions");
+        }
+
+        let sessionCollection = db.collection("sessions");
+        let sessionStore = new SessionStore(sessionCollection);
+        
+        // Create session
+        let newSession : model.IPickedSession = await sessionStore.add({ eventId: "eid", sessionId: "sid", userId: "uid" });
+        expect(model.isValidPickedSession(newSession, false).isValid).toBeTruthy();
+
+        // Get session using ID
+        expect(await sessionStore.getById(newSession._id.toHexString())).not.toBeNull();
+        
+        // Get all sessions
+        let events = await sessionStore.getForEvent("eid");
+        expect(events.length).toBe(1);
+        events = await sessionStore.getForUser("eid", "uid");
+        expect(events.length).toBe(1);
+
+        // Delete session
+        await sessionStore.delete(newSession._id.toHexString());
+        events = await sessionStore.getForEvent("eid");
+        expect(events.length).toBe(0);
+
+        done();
+    });
+
     afterEach(async (done) => {
         await client.close();
         jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;

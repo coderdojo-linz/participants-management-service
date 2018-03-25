@@ -8,6 +8,7 @@ export interface IDataContext {
     registrations: IRegistrationStore;
     eventbrite: IEventbrite;
     clients: IClientStore;
+    pickedSessions: IPickedSessionStore;
 }
 
 export interface IInitialAdmin {
@@ -53,6 +54,14 @@ export interface IRegistrationStore extends IStoreBase<model.IRegistration> {
 
 export interface IClientStore extends IStoreBase<model.IClientApp> {
     getByApiKey(apiKey: string): Promise<model.IClientApp>;
+}
+
+export interface IPickedSessionStore extends IStoreBase<model.IPickedSession> {
+    add(pickedSession: model.IPickedSession): Promise<model.IPickedSession>;
+    getById(_id: string): Promise<model.IPickedSession>;
+    getForEvent(eventId: string): Promise<model.IPickedSession[]>;
+    getForUser(eventId: string, userId: string): Promise<model.IPickedSession[]>;
+    delete(_id: string): Promise<any>;
 }
 
 export interface ITotalRegistrations {

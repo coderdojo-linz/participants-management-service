@@ -6,6 +6,7 @@ import RegistrationStore from '../dataAccess/registration-store';
 import * as model from '../model';
 import synchronize from '../dataAccess/eventbrite-sync';
 import * as contracts from '../dataAccess/contracts';
+import SessionStore from '../dataAccess/session-store';
 
 // NOTE THAT THIS FILE CONTAINS INTEGRATION TESTS
 // The tests need access to a Mongo test DB. They will create/delete collections there.
@@ -63,6 +64,7 @@ describe("Eventbrite synchronization", () => {
             events: new EventStore(db.collection("events")),
             participants: new ParticipantStore(db.collection("participants")),
             registrations: new RegistrationStore(db.collection("registrations")),
+            pickedSessions: new SessionStore(db.collection("sessions")),
             clients: null,
             eventbrite: null
         };

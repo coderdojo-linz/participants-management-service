@@ -1,0 +1,36 @@
+# @host = http://localhost:1337/api/sessions
+@host = https://participants-management-service.azurewebsites.net/api/sessions
+
+# Note that you have to get your own access tokens
+# to try the following requests
+
+###
+POST {{host}}/events/gab2018
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2NvZGVyZG9qb2xpbnouZXUuYXV0aDAuY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTA3NTUzMzQ5NTgxMzg4NTAyOTU0IiwiYXVkIjoia3k3b0htN1dxSVU5TURZZzYwZWk3OFl4MEl2bHRUUTMiLCJpYXQiOjE1MjE5NjM1NTIsImV4cCI6MTUyMTk5OTU1Mn0.yLrNO99vKVrEVKctLKiTU0qxAlL51syYn9l1MM3R6-Q
+
+{
+    "eventId": "gab2018",
+    "sessionId": "Azure101",
+    "userId": "user1234"
+}
+
+###
+GET {{host}}/5ab75c747e484226f8a34cc1
+Accept: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2NvZGVyZG9qb2xpbnouZXUuYXV0aDAuY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTA3NTUzMzQ5NTgxMzg4NTAyOTU0IiwiYXVkIjoia3k3b0htN1dxSVU5TURZZzYwZWk3OFl4MEl2bHRUUTMiLCJpYXQiOjE1MjE5NjM1NTIsImV4cCI6MTUyMTk5OTU1Mn0.yLrNO99vKVrEVKctLKiTU0qxAlL51syYn9l1MM3R6-Q
+
+###
+GET {{host}}/events/gab2018
+Accept: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2NvZGVyZG9qb2xpbnouZXUuYXV0aDAuY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTA3NTUzMzQ5NTgxMzg4NTAyOTU0IiwiYXVkIjoia3k3b0htN1dxSVU5TURZZzYwZWk3OFl4MEl2bHRUUTMiLCJpYXQiOjE1MjE5NjM1NTIsImV4cCI6MTUyMTk5OTU1Mn0.yLrNO99vKVrEVKctLKiTU0qxAlL51syYn9l1MM3R6-Q
+
+###
+GET {{host}}/events/gab2018/users/user1234
+Accept: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2NvZGVyZG9qb2xpbnouZXUuYXV0aDAuY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTA3NTUzMzQ5NTgxMzg4NTAyOTU0IiwiYXVkIjoia3k3b0htN1dxSVU5TURZZzYwZWk3OFl4MEl2bHRUUTMiLCJpYXQiOjE1MjE5NjM1NTIsImV4cCI6MTUyMTk5OTU1Mn0.yLrNO99vKVrEVKctLKiTU0qxAlL51syYn9l1MM3R6-Q
+
+###
+DELETE {{host}}/5ab75c747e484226f8a34cc1
+Accept: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2NvZGVyZG9qb2xpbnouZXUuYXV0aDAuY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTA3NTUzMzQ5NTgxMzg4NTAyOTU0IiwiYXVkIjoia3k3b0htN1dxSVU5TURZZzYwZWk3OFl4MEl2bHRUUTMiLCJpYXQiOjE1MjE5NjM1NTIsImV4cCI6MTUyMTk5OTU1Mn0.yLrNO99vKVrEVKctLKiTU0qxAlL51syYn9l1MM3R6-Q

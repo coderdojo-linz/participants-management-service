@@ -191,6 +191,33 @@ export function isValidRegistration(registration: IRegistration, isNew: boolean)
     return { isValid: true };
 }
 
+export interface IPickedSession extends IMongoObject {
+    eventId: string;
+    userId: string;
+    sessionId: string;
+}
+
+export function isValidPickedSession(pickedSession: IPickedSession, isNew: boolean): IValidationResult {
+    var result = isValidMongoObject(pickedSession, isNew);
+    if (!result.isValid) {
+        return result;
+    }
+
+    if (!pickedSession.eventId) {
+        return { isValid: false, errorMessage: "Mandatory member 'eventId' is missing." };
+    }
+
+    if (!pickedSession.userId) {
+        return { isValid: false, errorMessage: "Mandatory member 'userId' is missing." };
+    }
+
+    if (!pickedSession.sessionId) {
+        return { isValid: false, errorMessage: "Mandatory member 'sessionId' is missing." };
+    }
+    
+    return { isValid: true };
+}
+
 export interface IClientApp extends IMongoObject {
     apiKey: string;
     clientDescription: string;
