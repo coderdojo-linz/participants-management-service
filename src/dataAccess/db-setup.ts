@@ -1,10 +1,11 @@
-import * as mongodb from 'mongodb';
 import * as chalk from 'chalk';
+import * as mongodb from 'mongodb';
+
 import * as contracts from './contracts';
 
-async function setupNewDatabase(mongoUrl: string, initialAdmin: contracts.IInitialAdmin) {
+async function setupNewDatabase(mongoUrl: string, mongoDb: string, initialAdmin: contracts.IInitialAdmin) {
     let db = await mongodb.MongoClient.connect(mongoUrl);
-    let participants = db.collection("participants");
+    let participants = db.db(mongoDb).collection("participants");
     let admin = await participants.find({ isAdmin: true }).limit(1).toArray();
     if (!admin.length) {
         // No admin in DB -> create initial admin
@@ -19,7 +20,7 @@ async function setupNewDatabase(mongoUrl: string, initialAdmin: contracts.IIniti
         });
         console.log("No admin existed, created one.");
     } else {
-        console.log(chalk.red("DB already configured"))
+        console.log(chalk.default.red("DB already configured"))
         throw "DB already configured";
     }
 }

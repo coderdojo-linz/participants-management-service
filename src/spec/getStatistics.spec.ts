@@ -12,6 +12,7 @@ import * as mongodb from 'mongodb';
 
 describe("Get statistics", () => {
     var originalTimeout: number;
+    var client: mongodb.MongoClient;
     var db: mongodb.Db;
     var dc: contracts.IDataContext;
 
@@ -19,7 +20,8 @@ describe("Get statistics", () => {
         originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
         jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 
-        db = await mongodb.MongoClient.connect(config.MONGO_TEST_URL);
+        client = await mongodb.MongoClient.connect(config.MONGO_TEST_URL);
+        db = client.db(config.MONGO_TEST_DB);
         let collections = await db.listCollections({ name: "events" }).toArray();
         if (collections.length > 0) {
             await db.dropCollection("events");
@@ -120,7 +122,7 @@ describe("Get statistics", () => {
     });
     
     afterEach(async (done) => {
-        await db.close();
+        await client.close();
         jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
         done();
     });

@@ -13,7 +13,7 @@ class EventStore extends StoreBase<model.IEvent> implements contracts.IEventStor
             return await this.collection.find({}).sort({ "date": 1 }).toArray();
         } else {
             let now = new Date();
-            let result = await this.collection.find({
+            let result = await this.collection.find<model.IEvent>({
                 date: { $gte: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())) }
             }).sort({ "date": 1 }).toArray();
 

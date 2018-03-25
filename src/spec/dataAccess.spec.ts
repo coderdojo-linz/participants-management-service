@@ -22,13 +22,15 @@ class EscapeMock extends StoreBase<model.IParticipant> {
 
 describe("Data access", () => {
     var originalTimeout: number;
+    var client: mongodb.MongoClient;
     var db: mongodb.Db;
 
     beforeEach(async (done) => {
         originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
         jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
         
-        db = await mongodb.MongoClient.connect(config.MONGO_TEST_URL);
+        client = await mongodb.MongoClient.connect(config.MONGO_TEST_URL);
+        db = client.db(config.MONGO_TEST_DB);
         done();
     });
 
@@ -52,7 +54,7 @@ describe("Data access", () => {
         }
 
         // Execute method to test
-        await setupNewDatabase(config.MONGO_TEST_URL, { email: "d@trash-mail.com", givenName: "John",
+        await setupNewDatabase(config.MONGO_TEST_URL, config.MONGO_TEST_DB, { email: "d@trash-mail.com", givenName: "John",
             familyName: "Doe", googleSubject: "dummySubject" });
 
         // Participant collection has to exist and there has to be one admin in the participants collection
@@ -141,7 +143,7 @@ describe("Data access", () => {
     });
     
     afterEach(async (done) => {
-        await db.close();
+        await client.close();
         jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
         done();
     });

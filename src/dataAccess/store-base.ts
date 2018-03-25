@@ -19,7 +19,7 @@ class StoreBase<T extends model.IMongoObject> implements contracts.IStoreBase<T>
     }
 
     public async getById(_id: string): Promise<T> {
-        let result = await this.collection.find({ _id: new mongodb.ObjectID(_id) }).limit(1).toArray();
+        let result = await this.collection.find<T>({ _id: new mongodb.ObjectID(_id) }).limit(1).toArray();
         return (result.length !== 0) ? result[0] : null;
     }
 

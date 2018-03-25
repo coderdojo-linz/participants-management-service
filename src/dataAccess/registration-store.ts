@@ -34,7 +34,7 @@ class RegistrationStore extends StoreBase<model.IRegistration> implements contra
     }
     
     public async getByEventId(eventId: string, includeStatistics?: boolean): Promise<model.IRegistration[]> {
-        var result = await this.collection.find({ "event.id": new mongodb.ObjectID(eventId) })
+        var result = await this.collection.find<model.IRegistration>({ "event.id": new mongodb.ObjectID(eventId) })
             .project({ "_id": 1, "participant": 1, "registered": 1, "checkedin": 1, "needsComputer": 1 })
             .sort({ "participant.familyName": 1 }).toArray();
         
