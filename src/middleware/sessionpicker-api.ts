@@ -24,6 +24,7 @@ export async function add(req: express.Request, res: express.Response, next: exp
         }
 
         // Add row to db
+        pickedSession.userId = req.user.sub;
         let store = getDataContext(req).pickedSessions;
         let result = await store.add(pickedSession);
 
@@ -42,7 +43,7 @@ export async function getById(req: express.Request, res: express.Response, next:
         let result = await store.getById(req.params._id);
 
         // Build result
-        if (result) {
+        if (result && result.userId === req.user.sub) {
             res.status(200).send(result);
         } else {
             // Not found
@@ -60,7 +61,7 @@ export async function deleteById(req: express.Request, res: express.Response, ne
         let result = await store.getById(req.params._id);
 
         // Build result
-        if (result) {
+        if (result && result.userId === req.user.sub) {
             await store.delete(req.params._id);
             res.status(204).end();
         } else {
@@ -78,23 +79,7 @@ export async function getForEvent(req: express.Request, res: express.Response, n
 
         // Query db
         const dc = getDataContext(req);
-        let result = await dc.pickedSessions.getForEvent(eventId);
-
-        // Build result
-        res.status(200).send(result);
-    } catch (err) {
-        res.status(500).send({ error: err });
-    }
-}
-
-export async function getForUser(req: express.Request, res: express.Response, next: express.NextFunction) {
-    try {
-        const eventId = req.params.eventId;
-        const userId = req.params.userId;
-
-        // Query db
-        const dc = getDataContext(req);
-        let result = await dc.pickedSessions.getForUser(eventId, userId);
+        let result = await dc.pickedSessions.getForUser(eventId, req.user.sub);
 
         // Build result
         res.status(200).send(result);

@@ -207,7 +207,7 @@ export function isValidPickedSession(pickedSession: IPickedSession, isNew: boole
         return { isValid: false, errorMessage: "Mandatory member 'eventId' is missing." };
     }
 
-    if (!pickedSession.userId) {
+    if (!isNew && !pickedSession.userId) {
         return { isValid: false, errorMessage: "Mandatory member 'userId' is missing." };
     }
 

@@ -48,7 +48,6 @@ app.get("/api/participants/statistics/gender", participantsApi.getGenderStatisti
 // Sessionpicker API
 app.post("/api/sessions/events/:eventId", jwtCheckSessionpicker, sessions.add);
 app.get("/api/sessions/events/:eventId", jwtCheckSessionpicker, sessions.getForEvent);
-app.get("/api/sessions/events/:eventId/users/:userId", jwtCheckSessionpicker, sessions.getForUser);
 app.get("/api/sessions/:_id", jwtCheckSessionpicker, sessions.getById);
 app.delete("/api/sessions/:_id", jwtCheckSessionpicker, sessions.deleteById);
 
