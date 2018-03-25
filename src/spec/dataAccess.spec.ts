@@ -157,6 +157,10 @@ describe("Data access", () => {
         let newSession : model.IPickedSession = await sessionStore.add({ eventId: "eid", sessionId: "sid", userId: "uid" });
         expect(model.isValidPickedSession(newSession, false).isValid).toBeTruthy();
 
+        // Check ignoring duplicates
+        newSession = await sessionStore.add({ eventId: "eid", sessionId: "sid", userId: "uid" });
+        expect(model.isValidPickedSession(newSession, false).isValid).toBeTruthy();
+
         // Get session using ID
         expect(await sessionStore.getById(newSession._id.toHexString())).not.toBeNull();
         
